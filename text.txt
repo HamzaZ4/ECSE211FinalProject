@@ -1,0 +1,997 @@
+│   │   ├── myreadline.gcda
+│   │   ├── myreadline.o
+│   │   ├── node.c
+│   │   ├── node.gcda
+│   │   ├── node.o
+│   │   ├── parser.c
+│   │   ├── parser.gcda
+│   │   ├── parser.h
+│   │   ├── parser.o
+│   │   ├── parsetok.c
+│   │   ├── parsetok.gcda
+│   │   ├── parsetok.o
+│   │   ├── pegen
+│   │   │   ├── parse.c
+│   │   │   ├── parse.gcda
+│   │   │   ├── parse.o
+│   │   │   ├── parse_string.c
+│   │   │   ├── parse_string.gcda
+│   │   │   ├── parse_string.h
+│   │   │   ├── parse_string.o
+│   │   │   ├── peg_api.c
+│   │   │   ├── peg_api.gcda
+│   │   │   ├── peg_api.o
+│   │   │   ├── pegen.c
+│   │   │   ├── pegen.gcda
+│   │   │   ├── pegen.h
+│   │   │   └── pegen.o
+│   │   ├── pgen
+│   │   │   ├── automata.py
+│   │   │   ├── grammar.py
+│   │   │   ├── __init__.py
+│   │   │   ├── keywordgen.py
+│   │   │   ├── __main__.py
+│   │   │   ├── metaparser.py
+│   │   │   ├── pgen.py
+│   │   │   └── token.py
+│   │   ├── Python.asdl
+│   │   ├── token.c
+│   │   ├── token.gcda
+│   │   ├── tokenizer.c
+│   │   ├── tokenizer.gcda
+│   │   ├── tokenizer.h
+│   │   ├── tokenizer.o
+│   │   └── token.o
+│   ├── PC
+│   │   ├── bdist_wininst
+│   │   │   ├── archive.h
+│   │   │   ├── bdist_wininst.vcxproj
+│   │   │   ├── bdist_wininst.vcxproj.filters
+│   │   │   ├── build.bat
+│   │   │   ├── extract.c
+│   │   │   ├── install.c
+│   │   │   ├── install.rc
+│   │   │   ├── PythonPowered.bmp
+│   │   │   ├── README.txt
+│   │   │   └── resource.h
+│   │   ├── classicAppCompat.can.xml
+│   │   ├── classicAppCompat.cat
+│   │   ├── classicAppCompat.sccd
+│   │   ├── clinic
+│   │   │   ├── msvcrtmodule.c.h
+│   │   │   ├── _testconsole.c.h
+│   │   │   ├── winreg.c.h
+│   │   │   └── winsound.c.h
+│   │   ├── config.c
+│   │   ├── crtlicense.txt
+│   │   ├── dl_nt.c
+│   │   ├── empty.c
+│   │   ├── errmap.h
+│   │   ├── errmap.mak
+│   │   ├── frozen_dllmain.c
+│   │   ├── getpathp.c
+│   │   ├── icons
+│   │   │   ├── idlex150.png
+│   │   │   ├── idlex44.png
+│   │   │   ├── launcher.icns
+│   │   │   ├── launcher.ico
+│   │   │   ├── launcher.svg
+│   │   │   ├── logo.svg
+│   │   │   ├── logox128.png
+│   │   │   ├── pyc.icns
+│   │   │   ├── pyc.ico
+│   │   │   ├── pyc.svg
+│   │   │   ├── pyd.icns
+│   │   │   ├── pyd.ico
+│   │   │   ├── pyd.svg
+│   │   │   ├── py.icns
+│   │   │   ├── py.ico
+│   │   │   ├── py.png
+│   │   │   ├── py.svg
+│   │   │   ├── python.icns
+│   │   │   ├── python.ico
+│   │   │   ├── python.svg
+│   │   │   ├── pythonw.icns
+│   │   │   ├── pythonw.ico
+│   │   │   ├── pythonw.svg
+│   │   │   ├── pythonwx150.png
+│   │   │   ├── pythonwx44.png
+│   │   │   ├── pythonx150.png
+│   │   │   ├── pythonx44.png
+│   │   │   ├── pythonx50.png
+│   │   │   ├── setup.icns
+│   │   │   ├── setup.ico
+│   │   │   └── setup.svg
+│   │   ├── invalid_parameter_handler.c
+│   │   ├── launcher.c
+│   │   ├── layout
+│   │   │   ├── __init__.py
+│   │   │   ├── __main__.py
+│   │   │   ├── main.py
+│   │   │   └── support
+│   │   │       ├── appxmanifest.py
+│   │   │       ├── catalog.py
+│   │   │       ├── constants.py
+│   │   │       ├── distutils.command.bdist_wininst.py
+│   │   │       ├── filesets.py
+│   │   │       ├── __init__.py
+│   │   │       ├── logging.py
+│   │   │       ├── nuspec.py
+│   │   │       ├── options.py
+│   │   │       ├── pip.py
+│   │   │       ├── props.py
+│   │   │       └── python.props
+│   │   ├── _msi.c
+│   │   ├── msvcrtmodule.c
+│   │   ├── pyconfig.h
+│   │   ├── pylauncher.rc
+│   │   ├── pyshellext.cpp
+│   │   ├── pyshellext_d.def
+│   │   ├── pyshellext.def
+│   │   ├── pyshellext.idl
+│   │   ├── pyshellext.rc
+│   │   ├── python3.def
+│   │   ├── python3dll.c
+│   │   ├── python_exe.rc
+│   │   ├── python.manifest
+│   │   ├── python_nt.rc
+│   │   ├── python_uwp.cpp
+│   │   ├── python_ver_rc.h
+│   │   ├── pythonw_exe.rc
+│   │   ├── readme.txt
+│   │   ├── sqlite3.rc
+│   │   ├── store_info.txt
+│   │   ├── _testconsole.c
+│   │   ├── testpy.py
+│   │   ├── validate_ucrtbase.py
+│   │   ├── WinMain.c
+│   │   ├── winreg.c
+│   │   └── winsound.c
+│   ├── PCbuild
+│   │   ├── _asyncio.vcxproj
+│   │   ├── _asyncio.vcxproj.filters
+│   │   ├── build.bat
+│   │   ├── build_env.bat
+│   │   ├── _bz2.vcxproj
+│   │   ├── _bz2.vcxproj.filters
+│   │   ├── clean.bat
+│   │   ├── _ctypes_test.vcxproj
+│   │   ├── _ctypes_test.vcxproj.filters
+│   │   ├── _ctypes.vcxproj
+│   │   ├── _ctypes.vcxproj.filters
+│   │   ├── _decimal.vcxproj
+│   │   ├── _decimal.vcxproj.filters
+│   │   ├── _elementtree.vcxproj
+│   │   ├── _elementtree.vcxproj.filters
+│   │   ├── env.bat
+│   │   ├── env.ps1
+│   │   ├── field3.py
+│   │   ├── find_msbuild.bat
+│   │   ├── find_python.bat
+│   │   ├── fix_encoding.py
+│   │   ├── _freeze_importlib.vcxproj
+│   │   ├── _freeze_importlib.vcxproj.filters
+│   │   ├── get_external.py
+│   │   ├── get_externals.bat
+│   │   ├── _hashlib.vcxproj
+│   │   ├── _hashlib.vcxproj.filters
+│   │   ├── idle.bat
+│   │   ├── libffi.props
+│   │   ├── liblzma.vcxproj
+│   │   ├── liblzma.vcxproj.filters
+│   │   ├── lib.pyproj
+│   │   ├── _lzma.vcxproj
+│   │   ├── _lzma.vcxproj.filters
+│   │   ├── _msi.vcxproj
+│   │   ├── _msi.vcxproj.filters
+│   │   ├── _multiprocessing.vcxproj
+│   │   ├── _multiprocessing.vcxproj.filters
+│   │   ├── openssl.props
+│   │   ├── openssl.vcxproj
+│   │   ├── _overlapped.vcxproj
+│   │   ├── _overlapped.vcxproj.filters
+│   │   ├── pcbuild.proj
+│   │   ├── pcbuild.sln
+│   │   ├── prepare_libffi.bat
+│   │   ├── prepare_ssl.bat
+│   │   ├── prepare_ssl.py
+│   │   ├── prepare_tcltk.bat
+│   │   ├── pyexpat.vcxproj
+│   │   ├── pyexpat.vcxproj.filters
+│   │   ├── pylauncher.vcxproj
+│   │   ├── pylauncher.vcxproj.filters
+│   │   ├── pyproject.props
+│   │   ├── pyshellext.vcxproj
+│   │   ├── pyshellext.vcxproj.filters
+│   │   ├── python3dll.vcxproj
+│   │   ├── python3dll.vcxproj.filters
+│   │   ├── pythoncore.vcxproj
+│   │   ├── pythoncore.vcxproj.filters
+│   │   ├── python.props
+│   │   ├── python_uwp.vcxproj
+│   │   ├── python_uwp.vcxproj.filters
+│   │   ├── python.vcxproj
+│   │   ├── python.vcxproj.filters
+│   │   ├── pythonw_uwp.vcxproj
+│   │   ├── pythonw_uwp.vcxproj.filters
+│   │   ├── pythonw.vcxproj
+│   │   ├── pythonw.vcxproj.filters
+│   │   ├── pywlauncher.vcxproj
+│   │   ├── pywlauncher.vcxproj.filters
+│   │   ├── _queue.vcxproj
+│   │   ├── _queue.vcxproj.filters
+│   │   ├── readme.txt
+│   │   ├── regen.vcxproj
+│   │   ├── rmpyc.py
+│   │   ├── rt.bat
+│   │   ├── select.vcxproj
+│   │   ├── select.vcxproj.filters
+│   │   ├── _socket.vcxproj
+│   │   ├── _socket.vcxproj.filters
+│   │   ├── _sqlite3.vcxproj
+│   │   ├── sqlite3.vcxproj
+│   │   ├── _sqlite3.vcxproj.filters
+│   │   ├── sqlite3.vcxproj.filters
+│   │   ├── _ssl.vcxproj
+│   │   ├── _ssl.vcxproj.filters
+│   │   ├── tcltk.props
+│   │   ├── tcl.vcxproj
+│   │   ├── _testbuffer.vcxproj
+│   │   ├── _testbuffer.vcxproj.filters
+│   │   ├── _testcapi.vcxproj
+│   │   ├── _testcapi.vcxproj.filters
+│   │   ├── _testconsole.vcxproj
+│   │   ├── _testconsole.vcxproj.filters
+│   │   ├── _testembed.vcxproj
+│   │   ├── _testembed.vcxproj.filters
+│   │   ├── _testimportmultiple.vcxproj
+│   │   ├── _testimportmultiple.vcxproj.filters
+│   │   ├── _testinternalcapi.vcxproj
+│   │   ├── _testinternalcapi.vcxproj.filters
+│   │   ├── _testmultiphase.vcxproj
+│   │   ├── _testmultiphase.vcxproj.filters
+│   │   ├── tix.vcxproj
+│   │   ├── _tkinter.vcxproj
+│   │   ├── _tkinter.vcxproj.filters
+│   │   ├── tk.vcxproj
+│   │   ├── unicodedata.vcxproj
+│   │   ├── unicodedata.vcxproj.filters
+│   │   ├── urlretrieve.py
+│   │   ├── _uuid.vcxproj
+│   │   ├── _uuid.vcxproj.filters
+│   │   ├── venvlauncher.vcxproj
+│   │   ├── venvlauncher.vcxproj.filters
+│   │   ├── venvwlauncher.vcxproj
+│   │   ├── venvwlauncher.vcxproj.filters
+│   │   ├── winsound.vcxproj
+│   │   ├── winsound.vcxproj.filters
+│   │   ├── xxlimited.vcxproj
+│   │   ├── xxlimited.vcxproj.filters
+│   │   ├── _zoneinfo.vcxproj
+│   │   └── _zoneinfo.vcxproj.filters
+│   ├── profile-run-stamp
+│   ├── Programs
+│   │   ├── _freeze_importlib.c
+│   │   ├── python.c
+│   │   ├── python.gcda
+│   │   ├── python.o
+│   │   ├── README
+│   │   ├── _testembed
+│   │   ├── _testembed.c
+│   │   ├── _testembed.gcda
+│   │   └── _testembed.o
+│   ├── pybuilddir.txt
+│   ├── pyconfig.h
+│   ├── pyconfig.h.in
+│   ├── python
+│   ├── Python
+│   │   ├── asdl.c
+│   │   ├── asdl.gcda
+│   │   ├── asdl.o
+│   │   ├── ast.c
+│   │   ├── ast.gcda
+│   │   ├── ast.o
+│   │   ├── ast_opt.c
+│   │   ├── ast_opt.gcda
+│   │   ├── ast_opt.o
+│   │   ├── ast_unparse.c
+│   │   ├── ast_unparse.gcda
+│   │   ├── ast_unparse.o
+│   │   ├── bltinmodule.c
+│   │   ├── bltinmodule.gcda
+│   │   ├── bltinmodule.o
+│   │   ├── bootstrap_hash.c
+│   │   ├── bootstrap_hash.gcda
+│   │   ├── bootstrap_hash.o
+│   │   ├── ceval.c
+│   │   ├── ceval.gcda
+│   │   ├── ceval_gil.h
+│   │   ├── ceval.o
+│   │   ├── clinic
+│   │   │   ├── bltinmodule.c.h
+│   │   │   ├── context.c.h
+│   │   │   ├── import.c.h
+│   │   │   ├── marshal.c.h
+│   │   │   ├── sysmodule.c.h
+│   │   │   ├── traceback.c.h
+│   │   │   └── _warnings.c.h
+│   │   ├── codecs.c
+│   │   ├── codecs.gcda
+│   │   ├── codecs.o
+│   │   ├── compile.c
+│   │   ├── compile.gcda
+│   │   ├── compile.o
+│   │   ├── condvar.h
+│   │   ├── context.c
+│   │   ├── context.gcda
+│   │   ├── context.o
+│   │   ├── dtoa.c
+│   │   ├── dtoa.gcda
+│   │   ├── dtoa.o
+│   │   ├── dup2.c
+│   │   ├── dynamic_annotations.c
+│   │   ├── dynamic_annotations.o
+│   │   ├── dynload_aix.c
+│   │   ├── dynload_dl.c
+│   │   ├── dynload_hpux.c
+│   │   ├── dynload_shlib.c
+│   │   ├── dynload_shlib.gcda
+│   │   ├── dynload_shlib.o
+│   │   ├── dynload_stub.c
+│   │   ├── dynload_win.c
+│   │   ├── errors.c
+│   │   ├── errors.gcda
+│   │   ├── errors.o
+│   │   ├── fileutils.c
+│   │   ├── fileutils.gcda
+│   │   ├── fileutils.o
+│   │   ├── formatter_unicode.c
+│   │   ├── formatter_unicode.gcda
+│   │   ├── formatter_unicode.o
+│   │   ├── frozen.c
+│   │   ├── frozenmain.c
+│   │   ├── frozenmain.o
+│   │   ├── frozen.o
+│   │   ├── future.c
+│   │   ├── future.gcda
+│   │   ├── future.o
+│   │   ├── getargs.c
+│   │   ├── getargs.gcda
+│   │   ├── getargs.o
+│   │   ├── getcompiler.c
+│   │   ├── getcompiler.gcda
+│   │   ├── getcompiler.o
+│   │   ├── getcopyright.c
+│   │   ├── getcopyright.gcda
+│   │   ├── getcopyright.o
+│   │   ├── getopt.c
+│   │   ├── getopt.gcda
+│   │   ├── getopt.o
+│   │   ├── getplatform.c
+│   │   ├── getplatform.gcda
+│   │   ├── getplatform.o
+│   │   ├── getversion.c
+│   │   ├── getversion.gcda
+│   │   ├── getversion.o
+│   │   ├── graminit.c
+│   │   ├── graminit.o
+│   │   ├── hamt.c
+│   │   ├── hamt.gcda
+│   │   ├── hamt.o
+│   │   ├── hashtable.c
+│   │   ├── hashtable.gcda
+│   │   ├── hashtable.o
+│   │   ├── import.c
+│   │   ├── importdl.c
+│   │   ├── importdl.gcda
+│   │   ├── importdl.h
+│   │   ├── importdl.o
+│   │   ├── import.gcda
+│   │   ├── importlib_external.h
+│   │   ├── importlib.h
+│   │   ├── importlib_zipimport.h
+│   │   ├── import.o
+│   │   ├── initconfig.c
+│   │   ├── initconfig.gcda
+│   │   ├── initconfig.o
+│   │   ├── makeopcodetargets.py
+│   │   ├── marshal.c
+│   │   ├── marshal.gcda
+│   │   ├── marshal.o
+│   │   ├── modsupport.c
+│   │   ├── modsupport.gcda
+│   │   ├── modsupport.o
+│   │   ├── mysnprintf.c
+│   │   ├── mysnprintf.gcda
+│   │   ├── mysnprintf.o
+│   │   ├── mystrtoul.c
+│   │   ├── mystrtoul.gcda
+│   │   ├── mystrtoul.o
+│   │   ├── opcode_targets.h
+│   │   ├── pathconfig.c
+│   │   ├── pathconfig.gcda
+│   │   ├── pathconfig.o
+│   │   ├── peephole.c
+│   │   ├── peephole.gcda
+│   │   ├── peephole.o
+│   │   ├── preconfig.c
+│   │   ├── preconfig.gcda
+│   │   ├── preconfig.o
+│   │   ├── pyarena.c
+│   │   ├── pyarena.gcda
+│   │   ├── pyarena.o
+│   │   ├── pyctype.c
+│   │   ├── pyctype.o
+│   │   ├── pyfpe.c
+│   │   ├── pyfpe.o
+│   │   ├── pyhash.c
+│   │   ├── pyhash.gcda
+│   │   ├── pyhash.o
+│   │   ├── pylifecycle.c
+│   │   ├── pylifecycle.gcda
+│   │   ├── pylifecycle.o
+│   │   ├── pymath.c
+│   │   ├── pymath.gcda
+│   │   ├── pymath.o
+│   │   ├── pystate.c
+│   │   ├── pystate.gcda
+│   │   ├── pystate.o
+│   │   ├── pystrcmp.c
+│   │   ├── pystrcmp.gcda
+│   │   ├── pystrcmp.o
+│   │   ├── pystrhex.c
+│   │   ├── pystrhex.gcda
+│   │   ├── pystrhex.o
+│   │   ├── pystrtod.c
+│   │   ├── pystrtod.gcda
+│   │   ├── pystrtod.o
+│   │   ├── Python-ast.c
+│   │   ├── Python-ast.gcda
+│   │   ├── Python-ast.o
+│   │   ├── pythonrun.c
+│   │   ├── pythonrun.gcda
+│   │   ├── pythonrun.o
+│   │   ├── pytime.c
+│   │   ├── pytime.gcda
+│   │   ├── pytime.o
+│   │   ├── README
+│   │   ├── strdup.c
+│   │   ├── structmember.c
+│   │   ├── structmember.gcda
+│   │   ├── structmember.o
+│   │   ├── symtable.c
+│   │   ├── symtable.gcda
+│   │   ├── symtable.o
+│   │   ├── sysmodule.c
+│   │   ├── sysmodule.gcda
+│   │   ├── sysmodule.o
+│   │   ├── thread.c
+│   │   ├── thread.gcda
+│   │   ├── thread_nt.h
+│   │   ├── thread.o
+│   │   ├── thread_pthread.h
+│   │   ├── traceback.c
+│   │   ├── traceback.gcda
+│   │   ├── traceback.o
+│   │   ├── _warnings.c
+│   │   ├── _warnings.gcda
+│   │   ├── _warnings.o
+│   │   └── wordcode_helpers.h
+│   ├── python-config
+│   ├── python-config.py
+│   ├── python-gdb.py
+│   ├── README.rst
+│   ├── setup.py
+│   └── Tools
+│       ├── buildbot
+│       │   ├── build.bat
+│       │   ├── buildmsi.bat
+│       │   ├── clean.bat
+│       │   ├── remoteDeploy.bat
+│       │   ├── remotePythonInfo.bat
+│       │   └── test.bat
+│       ├── c-analyzer
+│       │   ├── c_analyzer
+│       │   │   ├── common
+│       │   │   │   ├── files.py
+│       │   │   │   ├── info.py
+│       │   │   │   ├── __init__.py
+│       │   │   │   ├── show.py
+│       │   │   │   └── util.py
+│       │   │   ├── __init__.py
+│       │   │   ├── parser
+│       │   │   │   ├── declarations.py
+│       │   │   │   ├── find.py
+│       │   │   │   ├── __init__.py
+│       │   │   │   ├── naive.py
+│       │   │   │   ├── preprocessor.py
+│       │   │   │   └── source.py
+│       │   │   ├── symbols
+│       │   │   │   ├── find.py
+│       │   │   │   ├── info.py
+│       │   │   │   ├── __init__.py
+│       │   │   │   └── _nm.py
+│       │   │   └── variables
+│       │   │       ├── find.py
+│       │   │       ├── info.py
+│       │   │       ├── __init__.py
+│       │   │       └── known.py
+│       │   ├── c-globals.py
+│       │   ├── check-c-globals.py
+│       │   ├── cpython
+│       │   │   ├── files.py
+│       │   │   ├── find.py
+│       │   │   ├── _generate.py
+│       │   │   ├── __init__.py
+│       │   │   ├── known.py
+│       │   │   ├── __main__.py
+│       │   │   ├── README
+│       │   │   └── supported.py
+│       │   ├── ignored-globals.txt
+│       │   ├── ignored.tsv
+│       │   ├── known.tsv
+│       │   ├── README
+│       │   └── TODO
+│       ├── ccbench
+│       │   └── ccbench.py
+│       ├── clinic
+│       │   ├── clinic.py
+│       │   └── cpp.py
+│       ├── demo
+│       │   ├── beer.py
+│       │   ├── eiffel.py
+│       │   ├── hanoi.py
+│       │   ├── life.py
+│       │   ├── markov.py
+│       │   ├── mcast.py
+│       │   ├── queens.py
+│       │   ├── README
+│       │   ├── redemo.py
+│       │   ├── rpythond.py
+│       │   ├── rpython.py
+│       │   ├── sortvisu.py
+│       │   ├── spreadsheet.py
+│       │   └── vector.py
+│       ├── freeze
+│       │   ├── bkfile.py
+│       │   ├── checkextensions.py
+│       │   ├── checkextensions_win32.py
+│       │   ├── extensions_win32.ini
+│       │   ├── flag.py
+│       │   ├── freeze.py
+│       │   ├── hello.py
+│       │   ├── makeconfig.py
+│       │   ├── makefreeze.py
+│       │   ├── makemakefile.py
+│       │   ├── parsesetup.py
+│       │   ├── README
+│       │   ├── test
+│       │   │   ├── Makefile
+│       │   │   └── ok.py
+│       │   ├── win32.html
+│       │   └── winmakemakefile.py
+│       ├── gdb
+│       │   └── libpython.py
+│       ├── i18n
+│       │   ├── makelocalealias.py
+│       │   ├── msgfmt.py
+│       │   └── pygettext.py
+│       ├── importbench
+│       │   ├── importbench.py
+│       │   └── README
+│       ├── iobench
+│       │   └── iobench.py
+│       ├── msi
+│       │   ├── build.bat
+│       │   ├── buildrelease.bat
+│       │   ├── bundle
+│       │   │   ├── bootstrap
+│       │   │   │   ├── LICENSE.txt
+│       │   │   │   ├── pch.cpp
+│       │   │   │   ├── pch.h
+│       │   │   │   ├── pythonba.cpp
+│       │   │   │   ├── pythonba.def
+│       │   │   │   ├── pythonba.sln
+│       │   │   │   ├── pythonba.vcxproj
+│       │   │   │   ├── PythonBootstrapperApplication.cpp
+│       │   │   │   └── resource.h
+│       │   │   ├── bundle.targets
+│       │   │   ├── bundle.wxl
+│       │   │   ├── bundle.wxs
+│       │   │   ├── Default.thm
+│       │   │   ├── Default.wxl
+│       │   │   ├── full.wixproj
+│       │   │   ├── packagegroups
+│       │   │   │   ├── core.wxs
+│       │   │   │   ├── crt.wxs
+│       │   │   │   ├── dev.wxs
+│       │   │   │   ├── doc.wxs
+│       │   │   │   ├── exe.wxs
+│       │   │   │   ├── launcher.wxs
+│       │   │   │   ├── lib.wxs
+│       │   │   │   ├── packageinstall.wxs
+│       │   │   │   ├── pip.wxs
+│       │   │   │   ├── postinstall.wxs
+│       │   │   │   ├── tcltk.wxs
+│       │   │   │   ├── test.wxs
+│       │   │   │   └── tools.wxs
+│       │   │   ├── releaselocal.wixproj
+│       │   │   ├── releaseweb.wixproj
+│       │   │   ├── SideBar.png
+│       │   │   └── snapshot.wixproj
+│       │   ├── common_en-US.wxl_template
+│       │   ├── common.wxs
+│       │   ├── core
+│       │   │   ├── core_d.wixproj
+│       │   │   ├── core_d.wxs
+│       │   │   ├── core_en-US.wxl
+│       │   │   ├── core_files.wxs
+│       │   │   ├── core_pdb.wixproj
+│       │   │   ├── core_pdb.wxs
+│       │   │   ├── core.wixproj
+│       │   │   └── core.wxs
+│       │   ├── csv_to_wxs.py
+│       │   ├── dev
+│       │   │   ├── dev_d.wixproj
+│       │   │   ├── dev_d.wxs
+│       │   │   ├── dev_en-US.wxl
+│       │   │   ├── dev_files.wxs
+│       │   │   ├── dev.wixproj
+│       │   │   └── dev.wxs
+│       │   ├── distutils.command.bdist_wininst.py
+│       │   ├── doc
+│       │   │   ├── doc_en-US.wxl_template
+│       │   │   ├── doc_files.wxs
+│       │   │   ├── doc_no_files.wxs
+│       │   │   ├── doc.wixproj
+│       │   │   └── doc.wxs
+│       │   ├── exe
+│       │   │   ├── exe_d.wixproj
+│       │   │   ├── exe_d.wxs
+│       │   │   ├── exe_en-US.wxl_template
+│       │   │   ├── exe_files.wxs
+│       │   │   ├── exe_pdb.wixproj
+│       │   │   ├── exe_pdb.wxs
+│       │   │   ├── exe_reg.wxs
+│       │   │   ├── exe.wixproj
+│       │   │   └── exe.wxs
+│       │   ├── generate_md5.py
+│       │   ├── get_externals.bat
+│       │   ├── launcher
+│       │   │   ├── launcher_en-US.wxl
+│       │   │   ├── launcher_files.wxs
+│       │   │   ├── launcher_reg.wxs
+│       │   │   ├── launcher.wixproj
+│       │   │   └── launcher.wxs
+│       │   ├── lib
+│       │   │   ├── lib_d.wixproj
+│       │   │   ├── lib_d.wxs
+│       │   │   ├── lib_en-US.wxl
+│       │   │   ├── lib_files.wxs
+│       │   │   ├── lib_pdb.wixproj
+│       │   │   ├── lib_pdb.wxs
+│       │   │   ├── lib.wixproj
+│       │   │   └── lib.wxs
+│       │   ├── make_appx.ps1
+│       │   ├── make_cat.ps1
+│       │   ├── make_zip.proj
+│       │   ├── msi.props
+│       │   ├── msi.targets
+│       │   ├── path
+│       │   │   ├── path_en-US.wxl
+│       │   │   ├── path.wixproj
+│       │   │   └── path.wxs
+│       │   ├── pip
+│       │   │   ├── pip_en-US.wxl
+│       │   │   ├── pip.wixproj
+│       │   │   └── pip.wxs
+│       │   ├── purge.py
+│       │   ├── README.txt
+│       │   ├── sdktools.psm1
+│       │   ├── sign_build.ps1
+│       │   ├── tcltk
+│       │   │   ├── tcltk_d.wixproj
+│       │   │   ├── tcltk_d.wxs
+│       │   │   ├── tcltk_en-US.wxl_template
+│       │   │   ├── tcltk_files.wxs
+│       │   │   ├── tcltk_pdb.wixproj
+│       │   │   ├── tcltk_pdb.wxs
+│       │   │   ├── tcltk_reg.wxs
+│       │   │   ├── tcltk.wixproj
+│       │   │   └── tcltk.wxs
+│       │   ├── test
+│       │   │   ├── test_d.wixproj
+│       │   │   ├── test_d.wxs
+│       │   │   ├── test_en-US.wxl
+│       │   │   ├── test_files.wxs
+│       │   │   ├── test_pdb.wixproj
+│       │   │   ├── test_pdb.wxs
+│       │   │   ├── test.wixproj
+│       │   │   └── test.wxs
+│       │   ├── testrelease.bat
+│       │   ├── tools
+│       │   │   ├── tools_en-US.wxl
+│       │   │   ├── tools_files.wxs
+│       │   │   ├── tools.wixproj
+│       │   │   └── tools.wxs
+│       │   ├── ucrt
+│       │   │   ├── ucrt_en-US.wxl
+│       │   │   ├── ucrt.wixproj
+│       │   │   └── ucrt.wxs
+│       │   ├── uploadrelease.bat
+│       │   ├── uploadrelease.proj
+│       │   ├── uploadrelease.ps1
+│       │   └── wix.props
+│       ├── nuget
+│       │   ├── build.bat
+│       │   ├── make_pkg.proj
+│       │   ├── pythonarm32.nuspec
+│       │   ├── pythondaily.nuspec
+│       │   ├── pythondaily.symbols.nuspec
+│       │   ├── python.nuspec
+│       │   └── pythonx86.nuspec
+│       ├── peg_generator
+│       │   ├── data
+│       │   │   ├── cprog.py
+│       │   │   ├── top-pypi-packages-365-days.json
+│       │   │   └── xxl.zip
+│       │   ├── Makefile
+│       │   ├── mypy.ini
+│       │   ├── pegen
+│       │   │   ├── ast_dump.py
+│       │   │   ├── build.py
+│       │   │   ├── c_generator.py
+│       │   │   ├── first_sets.py
+│       │   │   ├── grammar_parser.py
+│       │   │   ├── grammar.py
+│       │   │   ├── grammar_visualizer.py
+│       │   │   ├── __init__.py
+│       │   │   ├── keywordgen.py
+│       │   │   ├── __main__.py
+│       │   │   ├── metagrammar.gram
+│       │   │   ├── parser_generator.py
+│       │   │   ├── parser.py
+│       │   │   ├── python_generator.py
+│       │   │   ├── sccutils.py
+│       │   │   ├── testutil.py
+│       │   │   └── tokenizer.py
+│       │   ├── peg_extension
+│       │   │   ├── __init__.py
+│       │   │   └── peg_extension.c
+│       │   ├── pyproject.toml
+│       │   ├── requirements.pip
+│       │   └── scripts
+│       │       ├── ast_timings.py
+│       │       ├── benchmark.py
+│       │       ├── download_pypi_packages.py
+│       │       ├── find_max_nesting.py
+│       │       ├── grammar_grapher.py
+│       │       ├── __init__.py
+│       │       ├── joinstats.py
+│       │       ├── show_parse.py
+│       │       ├── test_parse_directory.py
+│       │       └── test_pypi_packages.py
+│       ├── pynche
+│       │   ├── ChipViewer.py
+│       │   ├── ColorDB.py
+│       │   ├── DetailsViewer.py
+│       │   ├── html40colors.txt
+│       │   ├── __init__.py
+│       │   ├── ListViewer.py
+│       │   ├── Main.py
+│       │   ├── namedcolors.txt
+│       │   ├── pyColorChooser.py
+│       │   ├── pynche
+│       │   ├── pynche.pyw
+│       │   ├── PyncheWidget.py
+│       │   ├── README
+│       │   ├── StripViewer.py
+│       │   ├── Switchboard.py
+│       │   ├── TextViewer.py
+│       │   ├── TypeinViewer.py
+│       │   ├── webcolors.txt
+│       │   ├── websafe.txt
+│       │   └── X
+│       │       ├── rgb.txt
+│       │       └── xlicense.txt
+│       ├── README
+│       ├── scripts
+│       │   ├── 2to3
+│       │   ├── abitype.py
+│       │   ├── analyze_dxp.py
+│       │   ├── byext.py
+│       │   ├── byteyears.py
+│       │   ├── checkpip.py
+│       │   ├── cleanfuture.py
+│       │   ├── combinerefs.py
+│       │   ├── copytime.py
+│       │   ├── crlf.py
+│       │   ├── db2pickle.py
+│       │   ├── diff.py
+│       │   ├── dutree.doc
+│       │   ├── dutree.py
+│       │   ├── eptags.py
+│       │   ├── finddiv.py
+│       │   ├── findlinksto.py
+│       │   ├── findnocoding.py
+│       │   ├── find_recursionlimit.py
+│       │   ├── find-uname.py
+│       │   ├── fixcid.py
+│       │   ├── fixdiv.py
+│       │   ├── fixheader.py
+│       │   ├── fixnotice.py
+│       │   ├── fixps.py
+│       │   ├── generate_opcode_h.py
+│       │   ├── generate_symbol_py.py
+│       │   ├── generate_token.py
+│       │   ├── get-remote-certificate.py
+│       │   ├── google.py
+│       │   ├── gprof2html.py
+│       │   ├── highlight.py
+│       │   ├── idle3
+│       │   ├── ifdef.py
+│       │   ├── import_diagnostics.py
+│       │   ├── lfcr.py
+│       │   ├── linktree.py
+│       │   ├── lll.py
+│       │   ├── mailerdaemon.py
+│       │   ├── make_ctype.py
+│       │   ├── md5sum.py
+│       │   ├── mkreal.py
+│       │   ├── ndiff.py
+│       │   ├── nm2def.py
+│       │   ├── objgraph.py
+│       │   ├── parseentities.py
+│       │   ├── parse_html5_entities.py
+│       │   ├── patchcheck.py
+│       │   ├── pathfix.py
+│       │   ├── pdeps.py
+│       │   ├── pep384_macrocheck.py
+│       │   ├── pickle2db.py
+│       │   ├── pindent.py
+│       │   ├── ptags.py
+│       │   ├── pydoc3
+│       │   ├── pysource.py
+│       │   ├── README
+│       │   ├── reindent.py
+│       │   ├── reindent-rst.py
+│       │   ├── rgrep.py
+│       │   ├── run_tests.py
+│       │   ├── serve.py
+│       │   ├── smelly.py
+│       │   ├── suff.py
+│       │   ├── texi2html.py
+│       │   ├── untabify.py
+│       │   ├── update_file.py
+│       │   ├── var_access_benchmark.py
+│       │   ├── which.py
+│       │   └── win_add2path.py
+│       ├── ssl
+│       │   ├── make_ssl_data.py
+│       │   └── multissltests.py
+│       ├── stringbench
+│       │   ├── README
+│       │   └── stringbench.py
+│       ├── test2to3
+│       │   ├── maintest.py
+│       │   ├── README
+│       │   ├── setup.py
+│       │   ├── test
+│       │   │   ├── runtests.py
+│       │   │   └── test_foo.py
+│       │   └── test2to3
+│       │       ├── hello.py
+│       │       └── __init__.py
+│       ├── tz
+│       │   └── zdump.py
+│       ├── unicode
+│       │   ├── comparecodecs.py
+│       │   ├── gencjkcodecs.py
+│       │   ├── gencodec.py
+│       │   ├── genmap_japanese.py
+│       │   ├── genmap_korean.py
+│       │   ├── genmap_schinese.py
+│       │   ├── genmap_support.py
+│       │   ├── genwincodec.py
+│       │   ├── genwincodecs.bat
+│       │   ├── listcodecs.py
+│       │   ├── Makefile
+│       │   ├── makeunicodedata.py
+│       │   ├── mkstringprep.py
+│       │   └── python-mappings
+│       │       ├── CP1140.TXT
+│       │       ├── CP273.TXT
+│       │       ├── diff
+│       │       │   ├── jisx0213-2000-std.txt.diff
+│       │       │   └── jisx0213-2004-std.txt.diff
+│       │       ├── gb-18030-2000.xml
+│       │       ├── GB2312.TXT
+│       │       ├── jisx0213-2004-std.txt
+│       │       ├── KOI8-U.TXT
+│       │       └── TIS-620.TXT
+│       └── unittestgui
+│           ├── README.txt
+│           └── unittestgui.py
+├── Python-3.9.5.tgz
+├── python_games
+│   ├── 4row_arrow.png
+│   ├── 4row_black.png
+│   ├── 4row_board.png
+│   ├── 4row_computerwinner.png
+│   ├── 4row_humanwinner.png
+│   ├── 4row_red.png
+│   ├── 4row_tie.png
+│   ├── badswap.wav
+│   ├── beep1.ogg
+│   ├── beep2.ogg
+│   ├── beep3.ogg
+│   ├── beep4.ogg
+│   ├── blankpygame.py
+│   ├── boy.png
+│   ├── catanimation.py
+│   ├── catgirl.png
+│   ├── cat.png
+│   ├── drawing.py
+│   ├── flippybackground.png
+│   ├── flippyboard.png
+│   ├── flippy.py
+│   ├── fourinarow.py
+│   ├── gameicon.png
+│   ├── gem1.png
+│   ├── gem2.png
+│   ├── gem3.png
+│   ├── gem4.png
+│   ├── gem5.png
+│   ├── gem6.png
+│   ├── gem7.png
+│   ├── gemgem.py
+│   ├── grass1.png
+│   ├── grass2.png
+│   ├── grass3.png
+│   ├── grass4.png
+│   ├── Grass_Block.png
+│   ├── horngirl.png
+│   ├── inkspilllogo.png
+│   ├── inkspill.py
+│   ├── inkspillresetbutton.png
+│   ├── inkspillsettingsbutton.png
+│   ├── inkspillsettings.png
+│   ├── inkspillspot.png
+│   ├── launcher.sh
+│   ├── match0.wav
+│   ├── match1.wav
+│   ├── match2.wav
+│   ├── match3.wav
+│   ├── match4.wav
+│   ├── match5.wav
+│   ├── memorypuzzle_obfuscated.py
+│   ├── memorypuzzle.py
+│   ├── pentomino.py
+│   ├── pinkgirl.png
+│   ├── Plain_Block.png
+│   ├── princess.png
+│   ├── RedSelector.png
+│   ├── Rock.png
+│   ├── Selector.png
+│   ├── simulate.py
+│   ├── slidepuzzle.py
+│   ├── squirrel.png
+│   ├── squirrel.py
+│   ├── Star.png
+│   ├── starPusherLevels.txt
+│   ├── starpusher.py
+│   ├── star_solved.png
+│   ├── star_title.png
+│   ├── tetrisb.mid
+│   ├── tetrisc.mid
+│   ├── tetrominoforidiots.py
+│   ├── tetromino.py
+│   ├── Tree_Short.png
+│   ├── Tree_Tall.png
+│   ├── Tree_Ugly.png
+│   ├── Wall_Block_Tall.png
+│   ├── Wood_Block_Tall.png
+│   └── wormy.py
+├── Scratch
+├── Templates
+└── Videos
