@@ -4,13 +4,28 @@ import time
 import math
 import random
 import traceback
+import threading
 from MapModule import *
 
 def calculate_x(distance, heading):
-    return distance * math.cos(heading)
+    """
+    Calculate x displacement considering direction of movement
+    
+    :param distance: Distance traveled (can be positive or negative)
+    :param heading: Current heading in degrees
+    :return: X displacement
+    """
+    return distance * math.cos(math.radians(heading))
     
 def calculate_y(distance, heading):
-    return distance * math.sin(heading)
+    """
+    Calculate y displacement considering direction of movement
+    
+    :param distance: Distance traveled (can be positive or negative)
+    :param heading: Current heading in degrees
+    :return: Y displacement
+    """
+    return distance * math.sin(math.radians(heading))
 
 
 class IntegratedRobot:
@@ -47,8 +62,18 @@ class IntegratedRobot:
         self.heading = 0        # Current orientation in degrees
 
         self.Map
+        self.shared_data = {
+            "angle": 0,
+            "distance": 0,
+            "is_blue": False,
+            "is_yellow": False,
+            "block_collection" : False,
+            "block_approach_angle" : -999
+        }
+        self.lock = threading.Lock()
         wait_ready_sensors()
         print("Robot initialized")
+
 
 
 
@@ -59,10 +84,59 @@ class IntegratedRobot:
         self.gyro.set_mode("abs")
         self.gyro.reset_measure()
 
+    def is_yellow(self, rgb):
+        r, g, b = rgb or (0, 0, 0)
+        return b <= 75 and r >= 200 and g >= 170
+    
     def normalize_angle(self, angle):
         """Normalize angle to be between 0 and 359 degrees"""
         return angle % 360
     
+    def is_blue(self, rgb):
+        r, g, b = rgb
+        blue_dominance_threshold = 50
+        return b > r + blue_dominance_threshold and b > g + blue_dominance_threshold
+
+    def sweep(self):
+        try:
+            self.arm_motor.reset_encoder()
+            current_position = 0
+            direction = 1
+            time.sleep(DELAY)
+
+            while not self.stop_event.is_set():
+
+                with self.lock:
+                    get_out_of_way = self.shared_data["block_collection"]
+                    direction_move = self.shared_data["block_approach_angle"]
+                if get_out_of_way:
+                    if direction_move > 90:
+                        self.arm_motor.set_position(180)
+                    else:
+                        self.arm_motor.set_position(0)
+
+                current_position = current_position + direction
+                self.arm_motor.set_position(current_position)
+                rgb = self.floor_cs.get_rgb()
+                is_blue = self.is_blue(rgb) if rgb else False
+                is_yellow = self.is_yellow(rgb) if rgb else False
+
+                distance = self.front_us.get_value()
+                with self.lock:
+                    self.shared_data["angle"] = current_position
+                    self.shared_data["distance"] = distance
+                    self.shared_data["is_blue"] = is_blue
+                    self.shared_data["is_yellow"] = is_yellow
+
+                time.sleep(DELAY)
+                print(f"Angle: {current_position}°, Distance: {distance:.2f} cm, Is Blue: {is_blue}")
+
+                if current_position > SWEEP_END or current_position < SWEEP_START:
+                    direction *= -1
+
+        except Exception as e:
+            print(f"Sweep error: {e}")
+
     def get_gyro_angle(self):
         """Get the normalized gyro angle"""
         angle = self.gyro.get_abs_measure()
@@ -90,11 +164,25 @@ class IntegratedRobot:
 
     # Function to update position
     def update_position(self, distance, angle):
-        # Convert heading to radians for trigonometry
-        heading_radians = math.radians(angle)
-        # Update coordinates
-        self.position[0] += distance * math.cos(heading_radians)
-        self.position[1] += distance * math.sin(heading_radians)
+        """
+        Update robot's position based on encoder readings
+        """
+        # Read motor encoders
+        left_counts = self.left_motor.get_encoder()
+        right_counts = self.right_motor.get_encoder()
+
+        # Determine movement direction and calculate distance
+        signed_distance = self.calculate_distance(left_counts, right_counts) * \
+        (1 if left_counts >= 0 and right_counts >= 0 else -1)
+
+        # Calculate x and y displacements
+        current_x = calculate_x(signed_distance, self.heading)
+        current_y = calculate_y(signed_distance, self.heading)
+
+        # Update total position
+        self.position[0] += current_x
+        self.position[1] += current_y
+        
 
     # Function to drive the robot straight
     def drive_straight(self, speed=-200, duration = 0.2):
@@ -163,12 +251,13 @@ def main():
         robot = IntegratedRobot()
         input("Press Enter to start")
         robot.reset()
-        total_x = 0
-        total_y = 0
-
         
 
         #make threads here
+        sweep_thread = threading.Thread(target=robot.sweep)
+        sweep_thread.start()
+
+        #might need to do something to restart if error occurs
 
         while True:
             # Read motor encoders
@@ -179,11 +268,12 @@ def main():
             distance = robot.calculate_distance(left_counts, right_counts)
 
             #odometry
+            #need to make sure that a backwards movement results in a negative change in position
             current_x = calculate_x(distance, robot.heading)
             current_y = calculate_y(distance, robot.heading)
 
-            total_x += current_x
-            total_y += current_y
+            #maybe something like if heading > 180* or <180* 
+            
 
             robot.Map.updateMap(total_x,total_y)
            
@@ -198,8 +288,13 @@ def main():
             
             #if(distance from US is <3cm):
                 #setsweep boolean to true
+            with robot.lock:
+                robot.shared_data["block_collection"] = True #moves over to 145*
 
-            #check to see if other side is blue  
+            #go forward 15 cm 
+                    
+
+            #check to see if other side is blue  ``
             #sweep function call for is floor blue
             
 
