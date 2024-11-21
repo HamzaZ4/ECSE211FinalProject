@@ -28,8 +28,8 @@ class Map:
         NONE
 
         '''
-        grid_x = x // 18
-        grid_y = y // 18
+        grid_x = x // 16
+        grid_y = y // 16
 
         #(54,70)
         self.MapArray[grid_x][grid_y] = 1 
