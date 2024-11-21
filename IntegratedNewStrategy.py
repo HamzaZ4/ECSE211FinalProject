@@ -94,6 +94,15 @@ class IntegratedRobot:
         return b <= 75 and r >= 200 and g >= 170
     
     def normalize_angle(self, angle):
+        return angle % 360
+    
+    def get_gyro_angle(self):
+        angle = self.gyro_sensor.get_abs_measure()
+        if angle is not None:
+            return self.normalize_angle(angle)
+        return self.target_angle
+    
+    def normalize_angle(self, angle):
         """Normalize angle to be between 0 and 359 degrees"""
         return angle % 360
     
@@ -115,13 +124,18 @@ class IntegratedRobot:
                     get_out_of_way = self.shared_data["block_collection"]
                     direction_move = self.shared_data["block_approach_angle"]
                 if get_out_of_way:
-                    if direction_move > 90:
+                    if direction_move == 90:
+                        self.arm_motor.set_position(145)
+                    elif direction_move > 90:
                         self.arm_motor.set_position(180)
                     else:
                         self.arm_motor.set_position(0)
 
-                current_position = current_position + direction
-                self.arm_motor.set_position(current_position)
+                
+                else:
+                    current_position = current_position + direction
+                    self.arm_motor.set_position(current_position)
+
                 rgb = self.floor_cs.get_rgb()
                 is_blue = self.is_blue(rgb) if rgb else False
                 is_yellow = self.is_yellow(rgb) if rgb else False
@@ -171,7 +185,6 @@ class IntegratedRobot:
     def update_position(self, distance, angle):
         """
         Update robot's position based on encoder readings
-        I need someone else to look at this to make sure when it moves backwards the total position is correctly updated
         """
         # Read motor encoders
         left_counts = self.left_motor.get_encoder()
@@ -188,8 +201,6 @@ class IntegratedRobot:
         # Update total position
         self.position[0] += current_x
         self.position[1] += current_y
-
-        self.Map.update_map(self.position[0], self.position[1])
         
 
     # Function to drive the robot straight
@@ -272,15 +283,21 @@ def main():
             left_counts = robot.left_motor.get_encoder()
             right_counts = robot.right_motor.get_encoder()
 
-            # Calculate distance traveled since last encoder reset
+            # Calculate distance traveled
             distance = robot.calculate_distance(left_counts, right_counts)
 
+            #odometry
+            #need to make sure that a backwards movement results in a negative change in position
+            current_x = calculate_x(distance, robot.heading)
+            current_y = calculate_y(distance, robot.heading)
+
+            #maybe something like if heading > 180* or <180* 
+            
+
+            robot.Map.updateMap(total_x,total_y)
+           
+           
             #TAGET AQUISITION
-            #ZHENGYU code for determining direction here
-                #ZHENGYU's code will use hamza's floor block algo
-                #     
-
-
 
             newdirection = 0 #sweep funciton call for nearest block
             robot.turn(newdirection)
