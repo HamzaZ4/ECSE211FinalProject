@@ -153,6 +153,19 @@ class IntegratedRobot:
         if angle is not None:
             return self.normalize_angle(angle)
         return self.target_angle
+    
+    def get_heading_error(self):
+        """Get the smallest angle difference between current and target angle"""
+        current_angle = self.get_gyro_angle()
+        error = current_angle - self.target_angle
+        
+        # Normalize error to [-180, 180]
+        while error > 180:
+            error -= 360
+        while error < -180:
+            error += 360
+            
+        return error
 
     # Function to calculate distance traveled
     def calculate_distance(self, left_counts, right_counts):
