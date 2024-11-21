@@ -7,6 +7,11 @@ import traceback
 import threading
 from MapModule import *
 
+SWEEP_SPEED = 220  # Speed in degrees per second
+DELAY = 0.01  # Delay between degrees for smooth and accurate readings
+SWEEP_START = 0
+SWEEP_END = 200
+
 def calculate_x(distance, heading):
     """
     Calculate x displacement considering direction of movement
@@ -166,6 +171,7 @@ class IntegratedRobot:
     def update_position(self, distance, angle):
         """
         Update robot's position based on encoder readings
+        I need someone else to look at this to make sure when it moves backwards the total position is correctly updated
         """
         # Read motor encoders
         left_counts = self.left_motor.get_encoder()
@@ -182,6 +188,8 @@ class IntegratedRobot:
         # Update total position
         self.position[0] += current_x
         self.position[1] += current_y
+
+        self.Map.update_map(self.position[0], self.position[1])
         
 
     # Function to drive the robot straight
@@ -264,21 +272,15 @@ def main():
             left_counts = robot.left_motor.get_encoder()
             right_counts = robot.right_motor.get_encoder()
 
-            # Calculate distance traveled
+            # Calculate distance traveled since last encoder reset
             distance = robot.calculate_distance(left_counts, right_counts)
 
-            #odometry
-            #need to make sure that a backwards movement results in a negative change in position
-            current_x = calculate_x(distance, robot.heading)
-            current_y = calculate_y(distance, robot.heading)
-
-            #maybe something like if heading > 180* or <180* 
-            
-
-            robot.Map.updateMap(total_x,total_y)
-           
-           
             #TAGET AQUISITION
+            #ZHENGYU code for determining direction here
+                #ZHENGYU's code will use hamza's floor block algo
+                #     
+
+
 
             newdirection = 0 #sweep funciton call for nearest block
             robot.turn(newdirection)
@@ -290,12 +292,28 @@ def main():
                 #setsweep boolean to true
             with robot.lock:
                 robot.shared_data["block_collection"] = True #moves over to 145*
+                robot.shared_data["block_approach_angle"] = 90
 
-            #go forward 15 cm 
-                    
-
-            #check to see if other side is blue  ``
-            #sweep function call for is floor blue
+            #go forward 5 cm 
+            robot.drive_straight()
+            if (robot.is_blue(robot.floor_cs.get_rgb())):
+                #avoid block here
+                #set block_approach_angle to 0 for right and 180 for left
+                #remember to update the map that this square is checked
+                pass
+            else:
+                robot.drive_straight()
+                with robot.lock:
+                    robot.shared_data["block_approach_angle"] = 5
+                    if (robot.is_blue(robot.floor_cs.get_rgb)):
+                        #avoid block again
+                        #update position and map
+                        pass
+                    else:
+                        #collect block code
+                            #approach
+                            #update position and map
+                        pass
             
 
             # Update position
