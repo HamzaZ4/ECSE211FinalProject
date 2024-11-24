@@ -9,7 +9,7 @@ class Map:
         MapArray[1][0] = True
         MapArray[0][1] = True
         
-        #each square is 18cm by 18cm 
+        #each square is 16cm by 16cm 
         
         #[[1][1][][][][]]
         #[[1][][][][][]]
@@ -52,7 +52,7 @@ class Map:
         #need to cover edge case where we are scanning outside the map
         target_x = x + distance * math.cos(possible_heading)
         target_y = y + distance * math.sin(possible_heading)
-        if((target_x >= 16 * 6) or (target_y >= 6 * 16)):
+        if (target_x < 0 or target_y < 0) or ((target_x >= 16 * 6) or (target_y >= 6 * 16)):
             return False
-        return self.MapArray[target_x][target_y]
+        return self.MapArray[target_x % 6][target_y % 6]
         
