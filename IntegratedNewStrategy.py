@@ -6,6 +6,7 @@ import random
 import traceback
 import threading
 from MapModule import *
+#from isBlock import *
 
 SWEEP_SPEED = 220  # Speed in degrees per second
 DELAY = 0.01  # Delay between degrees for smooth and accurate readings
@@ -217,8 +218,7 @@ class IntegratedRobot:
         right_counts = self.right_motor.get_encoder()
 
         # Determine movement direction and calculate distance
-        signed_distance = self.calculate_distance(left_counts, right_counts) * \
-        (1 if left_counts >= 0 and right_counts >= 0 else -1)
+        signed_distance = self.calculate_distance(left_counts, right_counts) 
 
         # Calculate x and y displacements
         current_x = calculate_x(signed_distance, self.heading)
@@ -254,8 +254,6 @@ class IntegratedRobot:
         self.left_motor.set_dps(0)
         self.right_motor.set_dps(0)
         
-
-
     # Function to turn the robot
     def turn(self, angle):
         """
