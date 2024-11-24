@@ -3,17 +3,25 @@ import math
 class MemoryDataStructure:
     def __init__(self):
         # Initialize the list to store distances, one for each angle from 0 to 180
-        self.single_list = [float('inf')] * 181
+        self.distance_list = [float('inf')] * 18
 
-    def update_list(self, angle, distance):
+        #self.angled_dic = {"0-10":[float('inf')],"11-20":[float('inf')],"21-30":[float('inf')],"31-40":[float('inf')],
+        #                   "41-50":[float('inf')],"51-60":[float('inf')],"61-70":[float('inf')],"71-80":[float('inf')],
+        #                   "81-90":[float('inf')],"91-100":[float('inf')],"101-110":[float('inf')],"111-120":[float('inf')],
+        #                   "121-130":[float('inf')],"131-140":[float('inf')],"141-150":[float('inf')],"151-160":[float('inf')],
+        #                   "":[float('inf')],"171-180":[float('inf')]}
+
+    def update_sweep_list(self, angle, distance):
         """
         Update the distance at a specific angle in the list.
         
         :param angle: The angle at which the distance was measured (integer, 0–180).
         :param distance: The distance measured at the given angle.
         """
-        if 0 <= angle <= 180:
-            self.single_list[angle] = distance
+        index = math.floor(angle / 10)
+        
+        if 0 <= index <= 18:
+            self.single_list[index] = distance
         else:
             raise ValueError("Angle must be between 0 and 180 degrees.")
 

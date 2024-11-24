@@ -32,7 +32,7 @@ class Map:
         grid_y = y // 16
 
         #(54,70)
-        self.MapArray[grid_x][grid_y] = 1 
+        self.MapArray[grid_x][grid_y] = True 
 
     def should_travel_or_not(self, x, y, possible_heading, distance):
         '''
@@ -52,7 +52,7 @@ class Map:
         #need to cover edge case where we are scanning outside the map
         target_x = x + distance * math.cos(possible_heading)
         target_y = y + distance * math.sin(possible_heading)
-        if((target_x >= 18 * 8) or (target_y >= 6 * 18)):
+        if((target_x >= 16 * 6) or (target_y >= 6 * 16)):
             return False
         return self.MapArray[target_x][target_y]
         
