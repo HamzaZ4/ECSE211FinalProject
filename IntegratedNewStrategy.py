@@ -142,10 +142,10 @@ class IntegratedRobot:
             
     def sweep(self, start=SWEEP_START, stop=SWEEP_END):
         try:
-            #self.arm_motor.reset_encoder()
             self.arm_motor.set_power(50)
             self.arm_motor.set_dps(SWEEP_SPEED)
-            current_position = 0
+            self.arm_motor.set_position(SWEEP_START)
+            current_position = SWEEP_START
             direction = 2
             time.sleep(DELAY)
             blue_intervals = []
@@ -154,44 +154,39 @@ class IntegratedRobot:
             current_max = None
 
             while True:
-
-                current_position = current_position + direction
+                current_position += direction
                 self.arm_motor.set_position(current_position)
-                
                 
                 rgb = self.shared_data["rgb"]
                 is_blue = self.is_blue(rgb) if rgb else False
                 is_red = self.is_red(rgb) if rgb else False
                 
                 if is_blue:
-                    if current_min == None:  # Start a new interval
+                    if current_min is None:  # Start a new interval
                         current_min = current_position
                     current_max = current_position
+                    
                 elif is_red:
-                    if current_min != None:
+                    if current_min is not None:
                         current_max = current_position
-                    
-                    
                 elif not is_red:
                     if current_min is not None:
-                    # End the current interval
+                            # End the current interval
                         current_blue_intervals.append((current_min, current_max))
                         current_min = None
                         current_max = None
 
                 time.sleep(DELAY)
-                #print(f"Angle: {current_position}°, is_red {is_red} cm, Is Blue: {is_blue}")
 
                 if current_position > stop or current_position < start:
-                    #print(f"blue_intervals {current_blue_intervals}")
-                    blue_intervals.append(current_blue_intervals)
-                    current_blue_intervals = []
+                    if current_blue_intervals != []:
+                        blue_intervals.append(current_blue_intervals)
+                        current_blue_intervals = []
                     direction *= -1
                     
                     if current_position < start:
                         break
                     
-            
             return blue_intervals
         except Exception as e:
             print(f"Sweep error: {e}")
@@ -287,7 +282,132 @@ class IntegratedRobot:
             print("obstacle!")
             self.turn(random.choice([-90, 90]))  # Turn left or right
             print("turn finished")
-                
+    
+    def avoid_blue(self, blue_intervals):
+        """
+        Adjusts the robot's movement to navigate through a suitable non-blue gap.
+        """
+
+        # Process blue intervals
+        exact_blue = self.find_exact_blue(blue_intervals)
+        if not exact_blue:
+            print("No blue detected after processing. Moving forward.")
+            self.drive_straight(speed=-100, duration=1)  # Advance forward
+            return
+
+        # Initialize non-blue intervals
+        non_blue_intervals = []
+
+        # Starting point
+        current_position = SWEEP_START
+
+        for interval in exact_blue:
+            start_blue, end_blue = interval
+
+            # Ensure start and end are in order
+            if start_blue > end_blue:
+                start_blue, end_blue = end_blue, start_blue
+
+            # If there's a gap before this blue interval
+            if start_blue > current_position:
+                non_blue_intervals.append((current_position, start_blue))
+
+            # Update current position
+            current_position = end_blue
+
+        # Check for gap after the last blue interval
+        if current_position < SWEEP_END:
+            non_blue_intervals.append((current_position, SWEEP_END))
+
+        print(f"Non-blue intervals: {non_blue_intervals}")
+
+        # Define minimum acceptable gap width (in degrees)
+        MIN_GAP_WIDTH = 60  # Adjust based on your robot's size and safety margin
+
+        # Define forward direction range
+        FORWARD_MIN = 80
+        FORWARD_MAX = 100
+
+        # Check if there is a clear path directly ahead (between FORWARD_MIN and FORWARD_MAX degrees)
+        max_gap_width = 0
+        best_interval = -1
+        forward_gap = None
+        for interval in non_blue_intervals:
+            gap_start, gap_end = interval
+            gap_width = gap_end - gap_start
+
+            # Check if the gap is wide enough
+            if gap_width >= MIN_GAP_WIDTH:
+                # Check if the gap includes the forward direction
+                if gap_start <= FORWARD_MIN and gap_end >= FORWARD_MAX:
+                    forward_gap = interval
+                    break
+        sweep_min_gap = 10
+        if forward_gap and len(blue_intervals) > 1:
+            # Safe to move forward
+            print("Clear path directly ahead. Moving forward.")
+            self.drive_straight(speed=-100, duration=1)
+        else:
+            # Find the best alternative gap
+            best_gap = None
+            selected_turn_angle = None
+
+            for interval in non_blue_intervals:
+                gap_start, gap_end = interval
+                gap_width = gap_end - gap_start
+
+                if gap_width >= MIN_GAP_WIDTH:
+                    
+                    print(f" gap end {gap_end} gab start {gap_start}")
+                    
+                    # Determine turn angle based on gap location relative to 90 degrees
+                    if gap_end <= 90:
+                        # Gap is entirely to the left; aim for the end of the gap
+                        target_angle = gap_end + sweep_min_gap
+                    elif gap_start >= 90:
+                        # Gap is entirely to the right; aim for the start of the gap
+                        target_angle = gap_start - sweep_min_gap
+                    else:
+                        
+                        target_angle = (gap_start + gap_end) / 2
+                        # Gap spans over 90 degrees; aim for the point closest to 90 degrees
+                        #if (90 - gap_start) < (gap_end - 90):
+                            #print("in lower")
+                            #target_angle = gap_end  - sweep_min_gap
+                            # Closer to the start
+                        #else:
+                            #print(
+                            #target_angle = gap_start  + sweep_min_gap# Closer to the end
+
+                    # Calculate turn angle from current heading (assuming 90° is straight ahead)
+                    turn_angle = target_angle - 90
+
+                    # Normalize turn_angle to [-180, 180]
+                    if turn_angle > 180:
+                        turn_angle -= 360
+                    elif turn_angle < -180:
+                        turn_angle += 360
+
+                    # Select the gap with the minimal absolute turn angle
+                    if selected_turn_angle is None or abs(turn_angle) < abs(selected_turn_angle):
+                        selected_turn_angle = turn_angle
+                        best_gap = interval
+
+            if best_gap and selected_turn_angle is not None:
+                # Limit the turn angle to the maximum allowed
+                MAX_TURN_ANGLE = 180  # Allows for drastic turns when necessary
+                turn_angle = max(min(selected_turn_angle, MAX_TURN_ANGLE), -MAX_TURN_ANGLE)
+
+                print(f"Turning towards gap at angle {turn_angle:.2f}°.")
+                self.turn(turn_angle)
+                self.drive_straight(speed=-100, duration=0.5)
+            else:
+                # No suitable gap found
+                print("No suitable gap found. Stopping.")
+                self.left_motor.set_dps(0)
+                self.right_motor.set_dps(0)
+
+
     
 def main():
     try:
