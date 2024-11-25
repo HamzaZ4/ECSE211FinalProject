@@ -113,6 +113,66 @@ class IntegratedRobot:
             self.shared_data["current_angle"] = self.gyro.get_abs_measure()
             time.sleep(DELAY)
 
+    def is_yellow(self):
+        """Check if the block is yellow"""
+        r, g, b = self.block_cs.get_rgb()  # Get RGB values
+        if (r == None):
+            r = 0
+        if (g == None):
+            g = 0
+        if (b == None):
+            b = 0
+
+        print(f"RGB values: R={r} G={g} B={b}")
+        # Simple heuristic to detect blueish color (you can adjust thresholds based on testing)
+        if b <= 75 and r >= 200 and g >= 170:
+            print("Poop detected.")
+            return True
+        return False
+
+    def is_cube(self):
+        r, g, b = self.block_cs.get_rgb()  # Get RGB values
+        if (r == None):
+            r = 0
+        if (g == None):
+            g = 0
+        if (b == None):
+            b = 0
+        if r+b+g > 33:
+            return True
+        return False
+
+    def collect_cube(self):
+        self.arm_motor.set_position(0)
+        self.drive_straight(-)
+
+
+
+        while not self.is_cube():
+            print("no cube")
+            self.left_motor.set_dps(0)
+            self.right_motor.set_dps(-25)
+            time.sleep(0.1)
+            self.left_motor.set_dps(-25)
+            self.right_motor.set_dps(0)
+
+        print("Block detected")
+        if self.is_yellow():
+            self.door_motor.reset_encoder()
+            self.door_motor.set_position(-50)
+            print("door opened")
+            time.sleep(0.5)
+            self.left_motor.set_position(-250)
+            self.right_motor.set_position(-250)
+            print("poop picked up")
+            time.sleep(0.5)
+            self.door_motor.set_position(50)
+            print("door closed")
+            time.sleep(0.5)
+            self.left_motor.set_position(250)
+            self.right_motor.set_position(250)
+            print("back to initial position")
+
     def sweep(self, start=SWEEP_START, stop=SWEEP_END):
         try:
             self.arm_motor.set_power(50)
@@ -435,7 +495,7 @@ class IntegratedRobot:
         """
         print(f"Driving toward target angle: {target_angle:.2f}° with distance: {distance:.2f} cm.")
 
-        dist_per_second = self.WHEEL_DIAMETER * math.pi * (300 / 360)  # Distance per second at 300 dps
+        dist_per_second = -self.WHEEL_DIAMETER * math.pi * (300 / 360)  # Distance per second at 300 dps
         drive_time = distance / dist_per_second  # Calculate drive duration
 
         start_time = time.time()
@@ -656,6 +716,7 @@ if __name__ == "__main__":
                 print(f"Additional cube detected at angle {center_angle}° with distance {distance} cm.")
                 detector.turn_to_cube(center_angle)
                 detector.go_towards_cube()
+                robot.collect_cube()
             else:
                 print("No additional cubes detected. Task complete.")
         else:
