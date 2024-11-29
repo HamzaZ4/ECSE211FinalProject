@@ -10,7 +10,7 @@ from MapModule import *
 SWEEP_SPEED = 220  # Speed in degrees per second
 DELAY = 0.01  # Delay between degrees for smooth and accurate readings
 SWEEP_START = 0
-SWEEP_END = 200
+SWEEP_END = 180
 SWEEP_UNIT = 2
 MIN_GAP_WIDTH = 60
 
@@ -30,9 +30,6 @@ def calculate_y(distance, heading):
 class IntegratedRobot:
     def __init__(self):
         print("Initializing robot...")
-        self.stop_thread = False  # Flag to stop the thread gracefully
-        # (rest of the initialization code)
-
         self.gyro = EV3GyroSensor(3)
         self.front_us = EV3UltrasonicSensor(1)
         self.block_cs = EV3ColorSensor(2)
@@ -61,14 +58,16 @@ class IntegratedRobot:
 
         self.target_angle = 0
         self.position = [0, 0]  # [x, y] in cm
-        self.heading = 45        # Current orientation in degrees
+        self.heading = 0        # Current orientation in degrees
         self.shared_data = {
             "rgb": [],
             "distance": 0.0,
-            "current_angle": 0
+            "current_angle": 0,
+            "block_rgb": []
         }
         self.distances = []
         self.angles = []
+        self.map = Map()
         wait_ready_sensors()
         self.arm_motor.set_limits(70, SWEEP_SPEED)
         print("Robot initialized")
@@ -81,6 +80,9 @@ class IntegratedRobot:
         self.gyro.set_mode("abs")
         self.gyro.reset_measure()
 
+    def is_yellow(self, rgb):
+        r, g, b = rgb or (0, 0, 0)
+        return b <= 75 and r >= 200 and g >= 170
 
     def normalize_angle(self, angle):
         """Normalize angle to be between 0 and 359 degrees"""
@@ -98,7 +100,7 @@ class IntegratedRobot:
 
     def is_blue(self, rgb):
         r, g, b = rgb
-        blue_dominance_threshold = 50
+        blue_dominance_threshold = 20
         return b > r + blue_dominance_threshold and b > g + blue_dominance_threshold
 
     def find_exact_blue(self, blue_intervals):
@@ -124,14 +126,11 @@ class IntegratedRobot:
         return real_blue_intervals
 
     def thread_arm_sensors(self):
-        try:
-            while not self.stop_thread:
-                self.shared_data["rgb"] = self.floor_cs.get_rgb()
-                self.shared_data["distance"] = self.front_us.get_value()
-                self.shared_data["current_angle"] = self.gyro.get_abs_measure()
-                time.sleep(DELAY)
-        except Exception as e:
-                print(f"Thread error: {e}")
+        while True:
+            self.shared_data["rgb"] = self.floor_cs.get_rgb()
+            self.shared_data["distance"] = self.front_us.get_value()
+            self.shared_data["current_angle"] = self.gyro.get_abs_measure()
+            time.sleep(DELAY)
 
     def blue_sweep(self, start=SWEEP_START, stop=SWEEP_END):
         try:
@@ -193,38 +192,56 @@ class IntegratedRobot:
         print(f" {start}, {end}")
         sweep_direction = SWEEP_UNIT * direction
         water_detected = False
+        block_position = -999
         if direction > 0:
 
             for i in range(start, end + sweep_direction, sweep_direction):
                 self.arm_motor.set_position(i)
                 rgb = self.shared_data["rgb"]
-                distance = self.shared_data.get("distance", None)
-                if distance is not None:
-                    self.distances.append(distance)
-                    self.angles.append(i)
-                    print(f"Angle: {i}°, Distance: {distance:.2f} cm")
-                else:
-                    print(f"No valid distance reading at angle {i}°.")
-
+                self.distances.append(self.shared_data["distance"])
                 self.angles.append(i)
                 is_blue = self.is_blue(rgb) if rgb else False
 
                 if is_blue:
-                    return True
-                time.sleep(DELAY)
+                    return True, False, block_position
+
+
+                if self.is_cube():
+                    time.sleep(0.1)
+                    if self.is_yellow_orange():
+
+                        block_position = i
+                        return False, True, block_position
+
+                    else:
+                        return False, False, block_position
+                time.sleep(0.03)
 
 
         else:
             for i in range(start, end + sweep_direction, sweep_direction):
                 self.arm_motor.set_position(i)
                 rgb = self.shared_data["rgb"]
+                self.distances.append(self.shared_data["distance"])
+                self.angles.append(i)
                 is_blue = self.is_blue(rgb) if rgb else False
 
                 if is_blue:
-                    return True
-                time.sleep(DELAY)
+                    return True, False, block_position
 
-        return water_detected
+                if self.is_cube():
+                    time.sleep(0.1)
+                    block_position = i
+                    if self.is_yellow_orange():
+
+                        return False, True, block_position
+
+                    else:
+                        return False, False, block_position
+                time.sleep(0.03)
+
+        return water_detected, False, block_position
+
 
     def get_gyro_angle(self):
         """Get the normalized gyro angle"""
@@ -243,6 +260,7 @@ class IntegratedRobot:
         """
         Update robot's position based on encoder readings
         """
+
         # Read motor encoders
         left_counts = self.left_motor.get_encoder()
         right_counts = self.right_motor.get_encoder()
@@ -258,8 +276,14 @@ class IntegratedRobot:
         self.position[0] += current_x
         self.position[1] += current_y
 
+        self.map.update_map(self.position[0],self.position[1])
+
     # Function to drive the robot straight
     def drive_straight(self, speed=-200, duration=0.2):
+
+#         fwd, possible_heading = self.map.ston(self, 0, (duration * 5.34))
+#         print(f"Forward Clear {fwd}, Best direction {possible_heading}")
+
         start_time = time.time()
         self.target_angle = self.get_gyro_angle()  # Lock current angle
 
@@ -314,17 +338,24 @@ class IntegratedRobot:
         return self.heading  # Return the last known heading if reading fails
 
     def turn(self, angle):
+        print(f"Current heading {self.heading}")
+        if angle > 0 :
+            print(f"Turn left {angle} degrees")
+        else:
+            print(f"Turn right {angle * 1} degress")
+
         angle = angle * -1
         initial_heading = self.get_gyro_angle()
         target_heading = self.normalize_angle(initial_heading + angle)
+        print(f"Non normalized target angle :{initial_heading + angle}")
         print(f"Turning from {initial_heading:.2f}° to {target_heading:.2f}° (angle: {angle:.2f}°)")
 
         # Determine turn direction based on the sign of the angle
-        if angle < 0:  # Turn right
+        if angle < 0:  # Turn left
             self.left_motor.set_dps(100)
             self.right_motor.set_dps(-100)
             print("robot turning left")
-        else:  # Turn left
+        else:  # Turn right
             self.left_motor.set_dps(-100)
             self.right_motor.set_dps(100)
             print("robot turning right")
@@ -334,6 +365,7 @@ class IntegratedRobot:
 
         while True:
             current_heading = self.get_gyro_angle()
+            print(f"gyro angle:{current_heading}")
             heading_error = self.angle_difference(target_heading, current_heading)
             #print(f"Current heading: {current_heading:.2f}°, Target heading: {target_heading:.2f}°, Heading error: {heading_error:.2f}°")
 
@@ -356,15 +388,15 @@ class IntegratedRobot:
     def detect_block(self):
         print("Analyzing block detection data...")
 
-        detection_radius = 10  # Detection threshold (cm)
-        block_distance_threshold = 10  # Block identification distance
+        detection_radius = 20  # Detection threshold (cm)
+        block_distance_threshold = 20  # Block identification distance
 
         candidates = []
         current_interval = []
 
         for i in range(len(self.distances)):
             print(f"Distance: {self.distances[i]:.2f}, Angle: {self.angles[i]:.2f}")
-            if self.distances[i] <= detection_radius:
+            if self.distances[i] <= detection_radius and self.angles[i]<130 and self.angles[i]>45:
                 current_interval.append((self.angles[i], self.distances[i]))
             else:
                 if current_interval:
@@ -408,8 +440,6 @@ class IntegratedRobot:
         # Turn the robot toward the cube
         self.turn(turn_angle)
 
-
-
         # Step 2: Calculate movement time based on distance
         dist_per_second = self.WHEEL_DIAMETER * math.pi * (300 / 360)  # Distance per second at 300 dps
         move_time = distance / dist_per_second  # Calculate time required to cover the distance
@@ -445,6 +475,176 @@ class IntegratedRobot:
 
             time.sleep(0.1)
 
+    def turn_to_cube(self, center_angle):
+        """
+        Aligns the robot with the cube by turning to 30 degrees before the center angle.
+        Dynamically adjusts until it detects the cube again and checks up to 30 degrees on both sides of the detected center.
+        """
+        PRE_TURN_OFFSET = 20  # Degrees to start turning before the detected angle
+        MAX_TURN_OFFSET = 20  # Maximum turn beyond the center angle on either side
+        ALIGNMENT_THRESHOLD = 9.9  # Distance threshold (cm) for ultrasonic sensor
+
+        print(f"Preparing to align with cube at center angle {center_angle:.2f}°...")
+
+        # Step 1: Rotate the arm to face forward (90°)
+        self.arm_motor.set_position(90)
+        time.sleep(0.5)  # Allow arm to stabilize
+
+        # Step 2: Turn to start position (30 degrees before center angle)
+        start_angle = center_angle - PRE_TURN_OFFSET
+        self.turn(start_angle - 90)
+        print(f"Turned to starting angle: {start_angle:.2f}°.")
+
+        # Step 3: Sweep until cube is detected or maximum bounds are reached
+        current_angle = start_angle
+        while True:
+            distance = self.shared_data["distance"]
+
+            if distance is not None and distance <= ALIGNMENT_THRESHOLD or self.is_cube():
+                print(f"Cube detected at {distance:.2f} cm. Alignment complete.")
+                break
+
+            # Adjust angle to continue sweeping
+            current_angle += 2  # Fine-tuning in 2-degree steps
+            self.turn(2)
+            time.sleep(0.1)
+
+            # Stop if maximum bounds are exceeded
+            if current_angle > center_angle + MAX_TURN_OFFSET:
+                print(f"Exceeded maximum bounds of {center_angle + MAX_TURN_OFFSET:.2f}°. Reversing direction.")
+                break
+
+        # Step 4: Sweep back to the other side if no cube is detected
+        if distance is None or distance > ALIGNMENT_THRESHOLD:
+            print("No cube detected. Sweeping back in the opposite direction.")
+            while True:
+                distance = self.front_us.get_value()
+
+                if distance is not None and distance <= ALIGNMENT_THRESHOLD:
+                    print(f"Cube detected at {distance:.2f} cm during reverse sweep. Alignment complete.")
+                    break
+
+                # Adjust angle to sweep back
+                current_angle -= 2  # Fine-tuning in 2-degree steps
+                self.turn(-2)
+                time.sleep(0.1)
+
+                # Stop if the lower bounds are exceeded
+                if current_angle < start_angle:
+                    print("Exceeded lower bounds during reverse sweep. Stopping alignment.")
+                    break
+
+        print("Cube aligned or maximum bounds reached. Ready to approach.")
+
+    def drive_to_target_with_correction(self, target_angle, distance):
+        """
+        Drives the robot toward the target angle while continuously correcting its heading.
+        """
+        print(f"Driving toward target angle: {target_angle:.2f}° with distance: {distance:.2f} cm.")
+
+        dist_per_second = -self.WHEEL_DIAMETER * math.pi * (300 / 360)  # Distance per second at 300 dps
+        drive_time = distance / dist_per_second  # Calculate drive duration
+
+        start_time = time.time()
+        while time.time() - start_time < drive_time:
+            # Check current heading
+            current_heading = self.get_gyro_angle()
+            heading_error = self.angle_difference(target_angle, current_heading)
+
+            # Apply correction if necessary
+            correction = self.KP * heading_error
+            left_speed = -200 - correction
+            right_speed = -200 + correction
+
+            self.left_motor.set_dps(left_speed)
+            self.right_motor.set_dps(right_speed)
+
+            time.sleep(DELAY)
+
+        # Stop the motors after driving
+        self.left_motor.set_dps(0)
+        self.right_motor.set_dps(0)
+        print("Reached target.")
+
+    def is_yellow_orange(self):
+        """Check if the block is yellow"""
+        r, g, b = self.block_cs.get_rgb()  # Get RGB values
+        if (r == None):
+            r = 0
+        if (g == None):
+            g = 0
+        if (b == None):
+            b = 0
+
+        print(f"RGB values: R={r} G={g} B={b}")
+        # Simple heuristic to detect blueish color (you can adjust thresholds based on testing)
+        if r >= 190:
+            print("Poop detected.")
+            return True
+        return False
+
+    def is_cube(self):
+        r, g, b = self.block_cs.get_rgb()  # Get RGB values
+        if (r == None):
+            r = 0
+        if (g == None):
+            g = 0
+        if (b == None):
+            b = 0
+        if r + b + g > 120:
+            return True
+        return False
+
+
+    def collect_cube(self):
+        time.sleep(0.5)
+        self.arm_motor.set_position(0)
+        self.door_motor.set_limits(30)
+        dist_per_second = self.WHEEL_DIAMETER * math.pi * (300 / 360)  # Distance per second at 300 dps
+        drive_time = 8 / dist_per_second  # Calculate drive duration
+        #self.drive_straight(-300, drive_time)
+        a = 0
+        is_poop = False
+
+        if self.is_yellow_orange():
+            self.arm_motor.set_position(0)
+            self.drive_straight(300,3)
+            print("poop picked up")
+            time.sleep(0.5)
+            self.door_motor.set_position(50)
+            print("door closed")
+            time.sleep(0.5)
+            self.poop_counter = self.poop_counter + 1
+            self.drive_straight(-300, drive_time)
+            print("back to initial position")
+        else:
+            drive_time = drive_time = 10 / dist_per_second
+            self.drive_straight(300, drive_time)
+            self.turn(random.choice([-90, 90]))
+
+
+    def cube_detection_process(self):
+        # Ensure `distances` and `angles` are populated before detection
+        center_angle, distance = self.detect_block()
+
+        if center_angle is not None and distance is not None:
+            print(f"Cube detected at angle {center_angle:.2f}° with distance {distance:.2f} cm.")
+
+            # Align with and approach the cube
+            self.turn_to_cube(center_angle)
+            self.go_towards_cube(stop_distance=4)
+
+            # Collect the cube
+            print("Collecting the cube...")
+            self.collect_cube()
+
+            print("Cube collection complete. Task complete.")
+            return True
+        else:
+            print("No cube detected. Exiting...")
+            return False
+
+
     def come_back_to_zero_degrees(self):
 
         start = self.arm_motor.get_position()
@@ -452,50 +652,8 @@ class IntegratedRobot:
             self.arm_motor.set_position(i)
             time.sleep(DELAY)
 
-    def turn_to_cube(self, center_angle):
-        PRE_TURN_OFFSET = 20  # Start turning before center angle
-        MAX_TURN_OFFSET = 20  # Maximum angle beyond center
-        ALIGNMENT_THRESHOLD = 4  # Stop turning if cube detected within this distance
 
-        print(f"Aligning to block at center angle {center_angle:.2f}°...")
 
-        # Rotate arm to forward position
-        self.arm_motor.set_position(90)
-        time.sleep(0.5)
-
-        # Turn to initial angle before the center
-        start_angle = center_angle - PRE_TURN_OFFSET
-        self.turn(start_angle - 90)
-        print(f"Turned to start angle {start_angle:.2f}°.")
-
-        # Sweep to detect cube
-        current_angle = start_angle
-        while True:
-            distance = self.front_us.get_value()
-
-            if distance is not None and distance <= ALIGNMENT_THRESHOLD:
-                print(f"Cube detected at {distance:.2f} cm. Alignment complete.")
-                break
-
-            # Turn incrementally
-            current_angle += 2
-            self.turn(2)
-            time.sleep(0.1)
-
-            # Reverse direction if bounds are exceeded
-            if current_angle > center_angle + MAX_TURN_OFFSET:
-                print("Exceeded bounds. Sweeping back.")
-                while current_angle > start_angle:
-                    current_angle -= 2
-                    self.turn(-2)
-                    distance = self.front_us.get_value()
-                    if distance is not None and distance <= ALIGNMENT_THRESHOLD:
-                        print(f"Cube detected during reverse sweep at {distance:.2f} cm.")
-                        return
-                print("Reverse sweep complete. No cube detected.")
-                break
-
-        print("Alignment process complete.")
 
     def avoid_blue(self, blue_intervals):
         """
@@ -652,163 +810,110 @@ class IntegratedRobot:
                 self.drive_straight(speed=100, duration=0.5)
                 self.update_position(0, self.heading)
                 self.turn(90)
-    def drive_to_target_with_correction(self, target_angle, distance):
-        """
-        Drives the robot toward the target angle while continuously correcting its heading.
-        """
-        print(f"Driving toward target angle: {target_angle:.2f}° with distance: {distance:.2f} cm.")
 
-        dist_per_second = -self.WHEEL_DIAMETER * math.pi * (300 / 360)  # Distance per second at 300 dps
-        drive_time = distance / dist_per_second  # Calculate drive duration
 
-        start_time = time.time()
-        while time.time() - start_time < drive_time:
-            # Check current heading
-            current_heading = self.get_gyro_angle()
-            heading_error = self.angle_difference(target_angle, current_heading)
 
-            # Apply correction if necessary
-            correction = self.KP * heading_error
-            left_speed = -200 - correction
-            right_speed = -200 + correction
+def main():
+    try:
 
-            self.left_motor.set_dps(left_speed)
-            self.right_motor.set_dps(right_speed)
+        robot = IntegratedRobot()
+        input("Press Enter to start")
+        robot.reset()
+        direction = 1
+        robot.arm_motor.set_power(50)
+        robot.arm_motor.set_dps(SWEEP_SPEED)
 
+        # Start thread for sensor monitoring
+        sweep_thread = threading.Thread(target=robot.thread_arm_sensors)
+        sweep_thread.start()
+
+        while True:
+            # Perform a sweep to detect blue areas
+            # turns left
+            # does this turn right or left?
+            if direction == 1:
+                print("sweeping fowards")
+                is_blue, is_poop, block_position = robot.sweep(start=SWEEP_START, end=SWEEP_END, direction=direction)
+
+            else:
+                print("sweeping backwards")
+                is_blue, is_poop, block_position = robot.sweep(start=SWEEP_END, end=SWEEP_START, direction=direction)
+
+            if is_blue:
+                print(f" sweep start {SWEEP_START} sweep end {SWEEP_END}")
+                robot.come_back_to_zero_degrees()
+                blue_intervals = robot.blue_sweep(SWEEP_START, SWEEP_END)
+                direction = -1
+
+                # Avoid the detected blue areas using the class method
+                if blue_intervals:
+                    print(f"Blue intervals detected: {blue_intervals}")
+                    robot.avoid_blue(blue_intervals)
+
+                else:
+                    robot.left_motor.reset_encoder()
+                    robot.right_motor.reset_encoder()
+
+                    robot.drive_straight(speed=-200, duration=0.5)
+                    robot.update_position(0, robot.heading)
+                    print(f"Position: {robot.position}")
+
+            elif block_position != -999:
+                if is_poop:
+                    robot.turn_to_cube(block_position)
+                    robot.collect_cube()
+                else:
+                    if block_position > 90:
+                        robot.turn(block_position - 15 - 90)
+                    else:
+                        robot.turn(block_position + 15 - 90)
+
+            else:
+                # center_angle, distance = robot.detect_block()
+                # center_angle, distance = None
+
+                # if center_angle is not None and distance is not None:
+                # print(f"Cube detected at angle {center_angle}° with distance {distance} cm.")
+
+                # Step 4: Turn to align with the cube using the updated turn_to_cube method
+                # robot.turn_to_cube(center_angle)
+
+                # Step 5: Move toward the cube
+                # robot.go_towards_cube()
+
+                # Step 6: Recheck surroundings after reaching the cube
+                # print("Rechecking surroundings after reaching the cube...")
+                # distances, angles = robot.sweep(start_angle=0, end_angle=180, step=5)
+                # center_angle, distance = detector.detect_block()
+
+
+                if robot.cube_detection_process() :
+                    continue
+                print("No cube detected. Exiting...")
+                robot.left_motor.reset_encoder()
+                robot.right_motor.reset_encoder()
+
+                robot.drive_straight(speed=-200, duration=0.5)
+                robot.update_position(0, robot.heading)
+                print(f"Position: {robot.position}")
+
+            # Short delay to prevent overloading the CPU
+            direction *= -1
             time.sleep(DELAY)
 
-        # Stop the motors after driving
-        self.left_motor.set_dps(0)
-        self.right_motor.set_dps(0)
-        print("Reached target.")
+    except BaseException as e:
+        print(traceback.format_exc())
+        print(e)
+    finally:
+        print(robot.position[0], robot.position[1])
+        robot.map.printMap()
+        print("Exiting program")
+        reset_brick()
+        exit()
 
 
-
-    def is_yellow(self):
-        """Check if the block is yellow"""
-        r, g, b = self.block_cs.get_rgb()  # Get RGB values
-        if (r == None):
-            r = 0
-        if (g == None):
-            g = 0
-        if (b == None):
-            b = 0
-
-        print(f"RGB values: R={r} G={g} B={b}")
-        # Simple heuristic to detect blueish color (you can adjust thresholds based on testing)
-        if b <= 75 and r >= 100 and g >= 100:
-            print("Poop detected.")
-            return True
-        return False
-
-    def is_cube(self):
-        r, g, b = self.block_cs.get_rgb()  # Get RGB values
-        if (r == None):
-            r = 0
-        if (g == None):
-            g = 0
-        if (b == None):
-            b = 0
-        if r + b + g > 100:
-            return True
-        return False
-
-    def collect_cube(self):
-        self.arm_motor.set_position(0)
-        dist_per_second = self.WHEEL_DIAMETER * math.pi * (300 / 360)  # Distance per second at 300 dps
-        drive_time = 8 / dist_per_second  # Calculate drive duration
-        self.drive_straight(-300, drive_time)
-
-        start_time = time.time()
-        drive_time = 1 / dist_per_second
-        while not self.is_cube():
-            print("no cube")
-            while time.time() - start_time < 0.3:
-                self.turn(9)
-                self.drive_straight(-300, drive_time)
-            start_time = time.time()
-            self.left_motor.set_dps(0)
-            self.right_motor.set_dps(0)
-            if self.is_cube():
-                break
-            while time.time() - start_time < 0.1:
-                self.turn(-10)
-                self.drive_straight(-300, drive_time)
-            start_time = time.time()
-
-        print("Block detected")
-
-        i = 0
-        while i < 10:
-            is_poop = self.is_yellow()
-            if is_poop:
-                break
-            time.sleep(0.1)
-            i = i + 1
-        time.sleep(0.2)
-        if is_poop:
-            self.door_motor.reset_encoder()
-            self.door_motor.set_position(-50)
-            print("door opened")
-            time.sleep(0.5)
-            drive_time = 8 / dist_per_second
-            self.drive_straight(-300, drive_time)
-            print("poop picked up")
-            time.sleep(0.5)
-            self.door_motor.set_position(50)
-            print("door closed")
-            time.sleep(0.5)
-            self.poop_counter = self.poop_counter + 1
-            self.drive_straight(300, drive_time)
-            print("back to initial position")
-        else:
-            drive_time = drive_time = 10 / dist_per_second
-            self.drive_straight(300, drive_time)
-            self.turn(random.choice([-90, 90]))
-
-    def cube_detection_process(self):
-        # Ensure `distances` and `angles` are populated before detection
-        self.sweep(0, 180)
-        center_angle, distance = self.detect_block()
-
-        if center_angle is not None and distance is not None:
-            print(f"Cube detected at angle {center_angle:.2f}° with distance {distance:.2f} cm.")
-
-            # Align with and approach the cube
-            self.turn_to_cube(center_angle)
-            self.go_towards_cube(stop_distance=4)
-
-            # Collect the cube
-            print("Collecting the cube...")
-            self.collect_cube()
-
-            print("Cube collection complete. Task complete.")
-        else:
-            print("No cube detected. Exiting...")
-
-
-try:
-    robot = IntegratedRobot()
-    input("Press Enter to start")
-    robot.reset()
-    direction = 1
-    robot.arm_motor.set_power(50)
-    robot.arm_motor.set_dps(SWEEP_SPEED)
-
-    # Start thread for sensor monitoring
-    sweep_thread = threading.Thread(target=robot.thread_arm_sensors)
-    sweep_thread.start()
-
-    robot.cube_detection_process()
-
-except BaseException as e:
-    print(traceback.format_exc())
-    print(e)
-finally:
-    print(robot.position[0],robot.position[1])
-    print("Exiting program")
-    reset_brick()
-    exit()
+if __name__ == "__main__":
+    main()
 
 
 
