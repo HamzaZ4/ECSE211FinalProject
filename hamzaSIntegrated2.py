@@ -454,6 +454,7 @@ class IntegratedRobot:
                         self.angles[i] > 45:
                     current_interval.append((self.angles[i], self.distances[i]))
                 else:
+
                     if last_distance - self.distances[i] < -2.5:
                         if len(current_interval) >= 3:  # Ensure interval is valid
                             candidates.append(current_interval)
