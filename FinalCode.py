@@ -13,6 +13,7 @@ SWEEP_START = 0
 SWEEP_END = 180
 SWEEP_UNIT = 2
 MIN_GAP_WIDTH = 60
+
 FLOOR_RGB_VALUES = {"blue": {"mean" : [24, 39, 105], "sd" : [3.46, 4.61, 4.72]},
                     "red": {"mean" : [155, 23, 34], "sd" : [3.45, 4.86, 3.27]},
                     "green": {"mean" : [63, 112, 43], "sd" : [5.83, 4.53, 3.08]}}
@@ -24,17 +25,21 @@ CUBE_RGB_VALUES = {"orange" : {"mean" : [193.21, 61.9, 24.73], "sd" : [1.64, 1.5
 
 
 }
+
+
 def calculate_x(distance, heading):
     """
     Calculate x displacement considering direction of movement
     """
     return distance * math.cos(math.radians(heading))
 
+
 def calculate_y(distance, heading):
     """
     Calculate y displacement considering direction of movement
     """
     return distance * math.sin(math.radians(heading))
+
 
 class IntegratedRobot:
     def __init__(self):
@@ -67,13 +72,13 @@ class IntegratedRobot:
 
         self.target_angle = 0
         self.position = [0, 0]  # [x, y] in cm
-        self.heading = 0        # Current orientation in degrees
-        #self.shared_data = {
-        #    "rgb": [],
-        #    "distance": 0.0,
-         #   "current_angle": 0,
-        #    "block_rgb": []
-        #}
+        self.heading = 0  # Current orientation in degrees
+        self.shared_data = {
+            "rgb": [],
+            "distance": 0.0,
+            "current_angle": 0,
+            "block_rgb": []
+        }
         self.distances = []
         self.angles = []
         self.map = Map()
@@ -109,44 +114,41 @@ class IntegratedRobot:
 
     def get_floor_color(self, rgb):
         r, g, b = rgb
-
         min_distance = 9999
         final_color = None
         for color, values in FLOOR_RGB_VALUES.items():
-
-            distance = math.sqrt(((values["mean"][0] - r)/values["sd"][0])**2 + ((values["mean"][1] - r)/values["sd"][1])**2 + ((values["mean"][2] - r)/values["sd"][2])**2)
+            distance = math.sqrt(
+                ((values["mean"][0] - r) / values["sd"][0]) ** 2 + ((values["mean"][1] - r) / values["sd"][1]) ** 2 + (
+                            (values["mean"][2] - r) / values["sd"][2]) ** 2)
             if distance < min_distance:
                 min_distance = distance
                 final_color = color
-        
+
         return final_color
 
     def get_cube_color(self, rgb):
         r, g, b = rgb
-
         min_distance = 9999
         final_color = None
         for color, values in CUBE_RGB_VALUES.items():
-
             distance = math.sqrt(((values["mean"][0] - r)/values["sd"][0])**2 + ((values["mean"][1] - g)/values["sd"][1])**2 + ((values["mean"][2] - b)/values["sd"][2])**2)
             if distance < min_distance:
                 min_distance = distance
                 final_color = color
-
         return final_color
-    
+
     def is_blue(self, rgb):
         r, g, b = rgb
-        
+
         color = self.get_floor_color(rgb)
         if color == "blue":
             return True
-        else :
+        else:
             return False
-        #br, bg, bb = [24, 39, 105]
-        #sr, sg, sb = [3.46, 4.61, 4.72]
-        #blue_dominance_threshold = 20
-        #return b > r + blue_dominance_threshold and b > g + blue_dominance_threshold
+        # br, bg, bb = [24, 39, 105]
+        # sr, sg, sb = [3.46, 4.61, 4.72]
+        # blue_dominance_threshold = 20
+        # return b > r + blue_dominance_threshold and b > g + blue_dominance_threshold
 
     def find_exact_blue(self, blue_intervals):
         real_blue_intervals = []
@@ -170,12 +172,13 @@ class IntegratedRobot:
         real_blue_intervals.append((cur_start, cur_end))
         return real_blue_intervals
 
-   # def thread_arm_sensors(self):
-        #while True:
-            #self.shared_data["rgb"] = self.floor_cs.get_rgb()
-            #self.shared_data["distance"] = self.front_us.get_value()
-            #self.shared_data["current_angle"] = self.gyro.get_abs_measure()
-            #time.sleep(DELAY)
+    def thread_arm_sensors(self):
+        while True:
+            # self.shared_data["rgb"] = self.floor_cs.get_rgb()
+            self.shared_data["distance"] = self.front_us.get_value()
+            self.shared_data["current_angle"] = self.gyro.get_abs_measure()
+
+            time.sleep(DELAY)
 
     def blue_sweep(self, start=SWEEP_START, stop=SWEEP_END):
         try:
@@ -208,7 +211,7 @@ class IntegratedRobot:
                         current_max = current_position
                 elif not is_red:
                     if current_min is not None:
-                            # End the current interval
+                        # End the current interval
                         current_blue_intervals.append((current_min, current_max))
                         current_min = None
                         current_max = None
@@ -243,13 +246,12 @@ class IntegratedRobot:
             for i in range(start, end + sweep_direction, sweep_direction):
                 self.arm_motor.set_position(i)
                 rgb = self.floor_cs.get_rgb()
-                self.distances.append(self.front_us.get_value())
+                self.distances.append(self.shared_data["distance"])
                 self.angles.append(i)
                 is_blue = self.is_blue(rgb) if rgb else False
 
                 if is_blue:
                     return True, False, block_position
-
 
                 if self.is_cube():
                     time.sleep(0.1)
@@ -267,7 +269,7 @@ class IntegratedRobot:
             for i in range(start, end + sweep_direction, sweep_direction):
                 self.arm_motor.set_position(i)
                 rgb = self.floor_cs.get_rgb()
-                self.distances.append(self.front_us.get_value())
+                self.distances.append(self.shared_data["distance"])
                 self.angles.append(i)
                 is_blue = self.is_blue(rgb) if rgb else False
 
@@ -286,7 +288,6 @@ class IntegratedRobot:
                 time.sleep(0.03)
 
         return water_detected, False, block_position
-
 
     def get_gyro_angle(self):
         """Get the normalized gyro angle"""
@@ -314,20 +315,20 @@ class IntegratedRobot:
         signed_distance = round(self.calculate_distance(left_counts, right_counts), 2)
 
         # Calculate x and y displacements
-        current_x = round(calculate_x(signed_distance, self.heading),2)
-        current_y = round(calculate_y(signed_distance, self.heading),2)
+        current_x = round(calculate_x(signed_distance, self.heading), 2)
+        current_y = round(calculate_y(signed_distance, self.heading), 2)
 
         # Update total position
         self.position[0] += current_x
         self.position[1] += current_y
 
-        self.map.update_map(self.position[0],self.position[1])
+        self.map.update_map(self.position[0], self.position[1])
 
     # Function to drive the robot straight
     def drive_straight(self, speed=-200, duration=0.2):
 
-#         fwd, possible_heading = self.map.ston(self, 0, (duration * 5.34))
-#         print(f"Forward Clear {fwd}, Best direction {possible_heading}")
+        #         fwd, possible_heading = self.map.ston(self, 0, (duration * 5.34))
+        #         print(f"Forward Clear {fwd}, Best direction {possible_heading}")
 
         start_time = time.time()
         self.target_angle = self.get_gyro_angle()  # Lock current angle
@@ -384,7 +385,7 @@ class IntegratedRobot:
 
     def turn(self, angle):
         print(f"Current heading {self.heading}")
-        if angle > 0 :
+        if angle > 0:
             print(f"Turn left {angle} degrees")
         else:
             print(f"Turn right {angle * 1} degress")
@@ -410,9 +411,9 @@ class IntegratedRobot:
 
         while True:
             current_heading = self.get_gyro_angle()
-            #print(f"gyro angle:{current_heading}")
+            # print(f"gyro angle:{current_heading}")
             heading_error = self.angle_difference(target_heading, current_heading)
-            #print(f"Current heading: {current_heading:.2f}°, Target heading: {target_heading:.2f}°, Heading error: {heading_error:.2f}°")
+            # print(f"Current heading: {current_heading:.2f}°, Target heading: {target_heading:.2f}°, Heading error: {heading_error:.2f}°")
 
             if abs(heading_error) < 2:
                 print("Desired heading reached. Stopping motors.")
@@ -435,20 +436,42 @@ class IntegratedRobot:
 
         detection_radius = 10  # Detection threshold (cm)
         block_distance_threshold = 10  # Block identification distance
+        drop_detected = False
 
         candidates = []
         current_interval = []
-
+        last_distance = self.distances[0]
         for i in range(len(self.distances)):
             print(f"Distance: {self.distances[i]:.2f}, Angle: {self.angles[i]:.2f}")
-            if self.distances[i] <= detection_radius and self.angles[i]<130 and self.angles[i]>45:
+
+            if drop_detected:
+                if self.distances[i] <= detection_radius and abs(last_distance - self.distances[i]) < 2.5 and 130 > \
+                        self.angles[i] > 45:
+                    current_interval.append((self.angles[i], self.distances[i]))
+                else:
+
+                    if last_distance - self.distances[i] < -2.5:
+                        if len(current_interval) >= 3:  # Ensure interval is valid
+                            candidates.append(current_interval)
+                        current_interval = []
+                        drop_detected = False
+                    else:
+                        current_interval = []
+                        drop_detected = False
+
+
+            elif self.distances[i] <= detection_radius and last_distance - self.distances[i] > 4 and 130 > self.angles[
+                i] > 45:
+                drop_detected = True
                 current_interval.append((self.angles[i], self.distances[i]))
             else:
-                if current_interval:
+                if len(current_interval) >= 3:  # Only append valid intervals
                     candidates.append(current_interval)
-                    current_interval = []
+                current_interval = []
 
-        if current_interval:
+            last_distance = self.distances[i]
+
+        if drop_detected and len(current_interval) >= 3:
             candidates.append(current_interval)
 
         for interval in candidates:
@@ -465,45 +488,26 @@ class IntegratedRobot:
         print("No block detected.")
         return None, None
 
-    def move_towards_cube(self, center_angle, distance):
-        """
-        Moves the robot toward the cube located at the specified center angle.
-        """
-        if center_angle is None or distance is None:
-            print("No cube detected. Cannot move towards it.")
-            return
-
-        print(f"Targeting cube at center angle: {center_angle:.2f}° with distance: {distance:.2f} cm.")
-
-        # Calculate the turn angle needed to align with the center angle
-        turn_angle = (center_angle - 90 + 360) % 360  # Normalize to [0, 360)
-        if turn_angle > 180:
-            turn_angle -= 360  # Normalize to [-180, 180]
-
-        print(f"Calculated turn angle: {turn_angle:.2f}°.")
-
-        # Turn the robot toward the cube
-        self.turn(turn_angle)
-
-        # Step 2: Calculate movement time based on distance
-        dist_per_second = self.WHEEL_DIAMETER * math.pi * (300 / 360)  # Distance per second at 300 dps
-        move_time = distance / dist_per_second  # Calculate time required to cover the distance
-
-        print(f"Driving straight for {move_time:.2f} seconds toward the cube.")
-
-        # Step 3: Drive straight toward the cube with optional heading correction
-        self.drive_to_target_with_correction(center_angle, distance)
-        print("Reached the cube.")
-
-    def go_towards_cube(self, stop_distance=4):
+    def go_towards_cube(self, stop_distance=2):
         print("Approaching cube...")
         self.arm_motor.set_position(90)  # Arm faces forward
         time.sleep(0.5)
 
-        while True:
+        start_time = time.time()  # Record the start time
+
+        while self.front_us.get_value() < 12:
+            elapsed_time = time.time() - start_time  # Calculate elapsed time
+
+            # Check if 4 seconds have passed
+            if elapsed_time > 4:
+                print("4 seconds elapsed. Performing alternate action.")
+                self.move_straight(300, 3)  # Move backward
+                self.turn(90)  # Turn 90 degrees
+                break
+
             distance = self.front_us.get_value()
 
-            if distance is not None and distance <= stop_distance:
+            if distance is not None and (distance <= stop_distance or self.is_cube()):
                 print(f"Reached cube at safe distance {distance:.2f} cm.")
                 self.left_motor.set_dps(0)
                 self.right_motor.set_dps(0)
@@ -533,6 +537,7 @@ class IntegratedRobot:
 
         # Step 1: Rotate the arm to face forward (90°)
         self.arm_motor.set_position(90)
+        self.drive_straight(speed=150, duration=0.3)
         time.sleep(0.5)  # Allow arm to stabilize
 
         # Step 2: Turn to start position (30 degrees before center angle)
@@ -547,6 +552,8 @@ class IntegratedRobot:
 
             if distance is not None and distance <= ALIGNMENT_THRESHOLD or self.is_cube():
                 print(f"Cube detected at {distance:.2f} cm. Alignment complete.")
+                # this is supposed to align the robot to the cube, but dont forget that the cube might not be within reach of the color sensor
+                # this means that we need to perform a similar turn thing once we get to the cube ( its gonna be a stop condition )
                 break
 
             # Adjust angle to continue sweeping
@@ -555,12 +562,12 @@ class IntegratedRobot:
             time.sleep(0.1)
 
             # Stop if maximum bounds are exceeded
-            if current_angle > center_angle + MAX_TURN_OFFSET:
+            if current_angle > center_angle + 10:
                 print(f"Exceeded maximum bounds of {center_angle + MAX_TURN_OFFSET:.2f}°. Reversing direction.")
                 break
 
         # Step 4: Sweep back to the other side if no cube is detected
-        if distance is None or distance > ALIGNMENT_THRESHOLD:
+        if distance is None or distance > ALIGNMENT_THRESHOLD and not self.is_cube():
             print("No cube detected. Sweeping back in the opposite direction.")
             while True:
                 distance = self.front_us.get_value()
@@ -579,7 +586,9 @@ class IntegratedRobot:
                     print("Exceeded lower bounds during reverse sweep. Stopping alignment.")
                     break
 
-        print("Cube aligned or maximum bounds reached. Ready to approach.")
+                    # functiona should probably return some type of boolean:
+
+        print("Cube aligned or maximum bounds reached.")
 
     def drive_to_target_with_correction(self, target_angle, distance):
         """
@@ -615,12 +624,10 @@ class IntegratedRobot:
         """Check if the block is yellow"""
         rgb = self.block_cs.get_rgb()  # Get RGB values
         color = self.get_cube_color(rgb)
-
         if color == "yellow" or color == "orange":
-            return True 
+            return True
         else:
             return False
-        
 
         print(f"RGB values: R={r} G={g} B={b}")
         # Simple heuristic to detect blueish color (you can adjust thresholds based on testing)
@@ -641,7 +648,6 @@ class IntegratedRobot:
             return True
         return False
 
-
     def collect_cube(self):
         time.sleep(0.5)
         self.arm_motor.set_position(0)
@@ -651,10 +657,8 @@ class IntegratedRobot:
         #self.drive_straight(-300, drive_time)
         a = 0
         is_poop = False
-
         self.drive_straight(-300, drive_time)
         blue_intervals = self.blue_sweep(SWEEP_START, SWEEP_END)
-
         if blue_intervals:
             for interval in blue_intervals:
                 min_blue, max_blue = interval
@@ -667,9 +671,6 @@ class IntegratedRobot:
             self.drive_straight(-300, 1)
             self.door_motor.set_position(0)
 
-        
-
-
     def cube_detection_process(self):
         # Ensure `distances` and `angles` are populated before detection
         center_angle, distance = self.detect_block()
@@ -679,18 +680,17 @@ class IntegratedRobot:
 
             # Align with and approach the cube
             self.turn_to_cube(center_angle)
-            self.go_towards_cube(stop_distance=4)
+            self.go_towards_cube(stop_distance=2)
 
             # Collect the cube
-            print("Collecting the cube...")
-            self.collect_cube()
 
             print("Cube collection complete. Task complete.")
+            self.collect_cube()
+
             return True
         else:
             print("No cube detected. Exiting...")
             return False
-
 
     def come_back_to_zero_degrees(self):
 
@@ -698,9 +698,6 @@ class IntegratedRobot:
         for i in range(start, SWEEP_START, -2):
             self.arm_motor.set_position(i)
             time.sleep(DELAY)
-
-
-
 
     def avoid_blue(self, blue_intervals):
         """
@@ -719,7 +716,7 @@ class IntegratedRobot:
             self.left_motor.reset_encoder()
             self.right_motor.reset_encoder()
             self.drive_straight(speed=-100, duration=1)  # Advance forward
-            self.update_position(0,self.heading)
+            self.update_position(0, self.heading)
             return
 
         # Initialize non-blue intervals
@@ -735,17 +732,16 @@ class IntegratedRobot:
             non_blue_end = start_blue
             current_position = end_blue
 
-
             # Ensure start and end are in order
-            #if start_blue > end_blue:
-                #start_blue, end_blue = end_blue, start_blue
+            # if start_blue > end_blue:
+            # start_blue, end_blue = end_blue, start_blue
 
             # If there's a gap before this blue interval
-            #if start_blue > current_position:
+            # if start_blue > current_position:
             non_blue_intervals.append((non_blue_start, non_blue_end))
 
             # Update current position
-            #current_position = end_blue
+            # current_position = end_blue
 
         # Check for gap after the last blue interval
         if current_position < SWEEP_END:
@@ -759,7 +755,6 @@ class IntegratedRobot:
         # Define forward direction range
         FORWARD_MIN = 50
         FORWARD_MAX = 130
-
 
         # Check if there is a clear path directly ahead (between FORWARD_MIN and FORWARD_MAX degrees)
         max_gap_width = 0
@@ -782,12 +777,12 @@ class IntegratedRobot:
             self.left_motor.reset_encoder()
             self.right_motor.reset_encoder()
             self.drive_straight(speed=-200, duration=1)
-            self.update_position(0,self.heading)
+            self.update_position(0, self.heading)
 
 
         else:
 
-            #find biggest gap
+            # find biggest gap
             for interval in non_blue_intervals:
                 gap_start, gap_end = interval
                 gap_width = abs(gap_end - gap_start)
@@ -797,31 +792,31 @@ class IntegratedRobot:
                         best_gap = gap_width
                         selected_interval = interval
 
-                    #print(f" gap end {gap_end} gab start {gap_start}")
+                    # print(f" gap end {gap_end} gab start {gap_start}")
 
             # Determine turn angle based on gap location relative to 90 degrees
             print(f"selected interval {selected_interval}")
             if selected_interval is not None:
                 gap_start, gap_end = selected_interval
                 if gap_end <= 90:
-                # Gap is entirely to the left; aim for the end of the gap
+                    # Gap is entirely to the left; aim for the end of the gap
 
                     target_angle = gap_end - sweep_min_gap
                 elif gap_start >= 90:
-                # Gap is entirely to the right; aim for the start of the gap
+                    # Gap is entirely to the right; aim for the start of the gap
                     target_angle = gap_start + sweep_min_gap
 
                 else:
 
                     target_angle = (gap_start + gap_end) / 2
                     # Gap spans over 90 degrees; aim for the point closest to 90 degrees
-                    #if (90 - gap_start) < (gap_end - 90):
-                        #print("in lower")
-                        #target_angle = gap_end  - sweep_min_gap
-                        # Closer to the start
-                    #else:
-                        #print(
-                        #target_angle = gap_start  + sweep_min_gap# Closer to the end
+                    # if (90 - gap_start) < (gap_end - 90):
+                    # print("in lower")
+                    # target_angle = gap_end  - sweep_min_gap
+                    # Closer to the start
+                    # else:
+                    # print(
+                    # target_angle = gap_start  + sweep_min_gap# Closer to the end
 
                     # Calculate turn angle from current heading (assuming 90° is straight ahead)
                 turn_angle = target_angle - 90
@@ -834,14 +829,12 @@ class IntegratedRobot:
 
                 selected_turn_angle = turn_angle
 
-
             if best_gap and selected_turn_angle is not None:
                 # Limit the turn angle to the maximum allowed
                 MAX_TURN_ANGLE = 180  # Allows for drastic turns when necessary
                 turn_angle = max(min(selected_turn_angle, MAX_TURN_ANGLE), -MAX_TURN_ANGLE)
 
                 print(f"Turning towards gap at angle {turn_angle:.2f}°.")
-
 
                 self.turn(turn_angle)
                 self.drive_straight(speed=-100, duration=0.5)
@@ -859,114 +852,23 @@ class IntegratedRobot:
                 self.turn(90)
 
 
-
 def main():
     try:
 
         robot = IntegratedRobot()
         input("Press Enter to start")
-        #robot.reset()
+        robot.reset()
         direction = 1
-        #robot.arm_motor.set_power(50)
-        #robot.arm_motor.set_dps(SWEEP_SPEED)
+        robot.arm_motor.set_power(50)
+        robot.arm_motor.set_dps(SWEEP_SPEED)
+
+        sweep_thread = threading.Thread(target=robot.thread_arm_sensors)
+        sweep_thread.start()
 
         # Start thread for sensor monitoring
-        #sweep_thread = threading.Thread(target=robot.thread_arm_sensors)
-        #sweep_thread.start()
 
-        while True:
-            # Perform a sweep to detect blue areas
-            # turns left
-            # does this turn right or left?
-            #print(robot.front_us.get_raw_value())
-            #print(robot.block_cs.get_rgb())
-            #if robot.is_cube():
-                #rgb = robot.block_cs.get_rgb()
-                #print(rgb)
-                
-               # print(robot.get_cube_color(rgb))
-            #time.sleep(DELAY)
-    
-           # continue
-        
-            if direction == 1:
-                print("sweeping fowards")
-                is_blue, is_poop, block_position = robot.sweep(start=SWEEP_START, end=SWEEP_END, direction=direction)
-
-            else:
-                print("sweeping backwards")
-                is_blue, is_poop, block_position = robot.sweep(start=SWEEP_END, end=SWEEP_START, direction=direction)
-
-            if is_blue:
-                print(f" sweep start {SWEEP_START} sweep end {SWEEP_END}")
-                robot.come_back_to_zero_degrees()
-                blue_intervals = robot.blue_sweep(SWEEP_START, SWEEP_END)
-                direction = -1
-
-                # Avoid the detected blue areas using the class method
-                if blue_intervals:
-                    print(f"Blue intervals detected: {blue_intervals}")
-                    robot.avoid_blue(blue_intervals)
-
-                else:
-                    robot.left_motor.reset_encoder()
-                    robot.right_motor.reset_encoder()
-
-                    robot.drive_straight(speed=-200, duration=0.5)
-                    robot.update_position(0, robot.heading)
-                    print(f"Position: {robot.position}")
-
-            elif block_position != -999:
-                if is_poop:
-                    robot.turn(block_position-90)
-                    robot.arm_motor.set_position(90)
-                    if robot.is_cube():
-                        robot.drive_straight(300, 0.1)
-                        robot.collect_cube()
-                    else:
-                        robot.turn_to_cube(block_position)
-                        if robot.is_cube:
-                            robot.collect_cube
-
-                        else:
-                            robot.turn(45)
-                else:
-                    if block_position > 90:
-                        robot.turn(block_position - 30 - 90)
-                    else:
-                        robot.turn(block_position + 30 -90)
-            else:
-                # center_angle, distance = robot.detect_block()
-                # center_angle, distance = None
-
-                # if center_angle is not None and distance is not None:
-                # print(f"Cube detected at angle {center_angle}° with distance {distance} cm.")
-
-                # Step 4: Turn to align with the cube using the updated turn_to_cube method
-                # robot.turn_to_cube(center_angle)
-
-                # Step 5: Move toward the cube
-                # robot.go_towards_cube()
-
-                # Step 6: Recheck surroundings after reaching the cube
-                # print("Rechecking surroundings after reaching the cube...")
-                # distances, angles = robot.sweep(start_angle=0, end_angle=180, step=5)
-                # center_angle, distance = detector.detect_block()
-
-
-                if robot.cube_detection_process() :
-                    continue
-                print("No cube detected. Exiting...")
-                robot.left_motor.reset_encoder()
-                robot.right_motor.reset_encoder()
-
-                robot.drive_straight(speed=-200, duration=0.5)
-                robot.update_position(0, robot.heading)
-                print(f"Position: {robot.position}")
-
-            # Short delay to prevent overloading the CPU
-            direction *= -1
-            time.sleep(DELAY)
+        robot.sweep()
+        robot.cube_detection_process()
 
     except BaseException as e:
         print(traceback.format_exc())
@@ -981,3 +883,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
