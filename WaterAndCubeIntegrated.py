@@ -13,8 +13,17 @@ SWEEP_START = 0
 SWEEP_END = 180
 SWEEP_UNIT = 2
 MIN_GAP_WIDTH = 60
+FLOOR_RGB_VALUES = {"blue": {"mean" : [24, 39, 105], "sd" : [3.46, 4.61, 4.72]},
+                    "red": {"mean" : [155, 23, 34], "sd" : [3.45, 4.86, 3.27]},
+                    "green": {"mean" : [63, 112, 43], "sd" : [5.83, 4.53, 3.08]}}
+
+CUBE_RGB_VALUES = {"orange" : {"mean" : [273, 66.4, 29.2], "sd" : [1.03, 2.45, 3.08]},
+                    "blue" : {"mean" : [25, 43.6, 125.3], "sd" : [2.43, 5.65, 4.32]},
+                    "yellow": {"mean" : [268.3, 188.1, 18.3], "sd" : [2.85, 5.63, 2.96]},
+                    "purple" : {"mean" : [66.3, 45.1, 42.6], "sd" : [3.92, 3.62, 3.79]}
 
 
+}
 def calculate_x(distance, heading):
     """
     Calculate x displacement considering direction of movement
@@ -59,12 +68,12 @@ class IntegratedRobot:
         self.target_angle = 0
         self.position = [0, 0]  # [x, y] in cm
         self.heading = 0        # Current orientation in degrees
-        self.shared_data = {
-            "rgb": [],
-            "distance": 0.0,
-            "current_angle": 0,
-            "block_rgb": []
-        }
+        #self.shared_data = {
+        #    "rgb": [],
+        #    "distance": 0.0,
+         #   "current_angle": 0,
+        #    "block_rgb": []
+        #}
         self.distances = []
         self.angles = []
         self.map = Map()
@@ -98,10 +107,30 @@ class IntegratedRobot:
         red_dominance_threshold = 50
         return r > g + red_dominance_threshold and r > b + red_dominance_threshold
 
+    def get_floor_color(self, rgb):
+        r, g, b = rgb
+
+        min_distance = 9999
+        final_color = None
+        for color, values in FLOOR_RGB_VALUES.items():
+
+            distance = math.sqrt(((values["mean"][0] - r)/values["sd"][0])**2 + ((values["mean"][1] - r)/values["sd"][1])**2 + ((values["mean"][2] - r)/values["sd"][2])**2)
+            if distance < min_distance:
+                min_distance = distance
+                final_color = color
+
     def is_blue(self, rgb):
         r, g, b = rgb
-        blue_dominance_threshold = 20
-        return b > r + blue_dominance_threshold and b > g + blue_dominance_threshold
+        
+        color = self.get_floor_color(rgb)
+        if color == "blue":
+            return True
+        else :
+            return False
+        #br, bg, bb = [24, 39, 105]
+        #sr, sg, sb = [3.46, 4.61, 4.72]
+        #blue_dominance_threshold = 20
+        #return b > r + blue_dominance_threshold and b > g + blue_dominance_threshold
 
     def find_exact_blue(self, blue_intervals):
         real_blue_intervals = []
@@ -125,12 +154,12 @@ class IntegratedRobot:
         real_blue_intervals.append((cur_start, cur_end))
         return real_blue_intervals
 
-    def thread_arm_sensors(self):
-        while True:
-            self.shared_data["rgb"] = self.floor_cs.get_rgb()
-            self.shared_data["distance"] = self.front_us.get_value()
-            self.shared_data["current_angle"] = self.gyro.get_abs_measure()
-            time.sleep(DELAY)
+   # def thread_arm_sensors(self):
+        #while True:
+            #self.shared_data["rgb"] = self.floor_cs.get_rgb()
+            #self.shared_data["distance"] = self.front_us.get_value()
+            #self.shared_data["current_angle"] = self.gyro.get_abs_measure()
+            #time.sleep(DELAY)
 
     def blue_sweep(self, start=SWEEP_START, stop=SWEEP_END):
         try:
@@ -149,7 +178,7 @@ class IntegratedRobot:
                 current_position += direction
                 self.arm_motor.set_position(current_position)
 
-                rgb = self.shared_data["rgb"]
+                rgb = self.floor_cs.get_rgb()
                 is_blue = self.is_blue(rgb) if rgb else False
                 is_red = self.is_red(rgb) if rgb else False
 
@@ -197,8 +226,8 @@ class IntegratedRobot:
 
             for i in range(start, end + sweep_direction, sweep_direction):
                 self.arm_motor.set_position(i)
-                rgb = self.shared_data["rgb"]
-                self.distances.append(self.shared_data["distance"])
+                rgb = self.floor_cs.get_rgb()
+                self.distances.append(self.front_us.get_value())
                 self.angles.append(i)
                 is_blue = self.is_blue(rgb) if rgb else False
 
@@ -221,8 +250,8 @@ class IntegratedRobot:
         else:
             for i in range(start, end + sweep_direction, sweep_direction):
                 self.arm_motor.set_position(i)
-                rgb = self.shared_data["rgb"]
-                self.distances.append(self.shared_data["distance"])
+                rgb = self.floor_cs.get_rgb()
+                self.distances.append(self.front_us.get_value())
                 self.angles.append(i)
                 is_blue = self.is_blue(rgb) if rgb else False
 
@@ -365,7 +394,7 @@ class IntegratedRobot:
 
         while True:
             current_heading = self.get_gyro_angle()
-            print(f"gyro angle:{current_heading}")
+            #print(f"gyro angle:{current_heading}")
             heading_error = self.angle_difference(target_heading, current_heading)
             #print(f"Current heading: {current_heading:.2f}°, Target heading: {target_heading:.2f}°, Heading error: {heading_error:.2f}°")
 
@@ -388,8 +417,8 @@ class IntegratedRobot:
     def detect_block(self):
         print("Analyzing block detection data...")
 
-        detection_radius = 20  # Detection threshold (cm)
-        block_distance_threshold = 20  # Block identification distance
+        detection_radius = 10  # Detection threshold (cm)
+        block_distance_threshold = 10  # Block identification distance
 
         candidates = []
         current_interval = []
@@ -480,8 +509,8 @@ class IntegratedRobot:
         Aligns the robot with the cube by turning to 30 degrees before the center angle.
         Dynamically adjusts until it detects the cube again and checks up to 30 degrees on both sides of the detected center.
         """
-        PRE_TURN_OFFSET = 20  # Degrees to start turning before the detected angle
-        MAX_TURN_OFFSET = 20  # Maximum turn beyond the center angle on either side
+        PRE_TURN_OFFSET = 10  # Degrees to start turning before the detected angle
+        MAX_TURN_OFFSET = 10  # Maximum turn beyond the center angle on either side
         ALIGNMENT_THRESHOLD = 9.9  # Distance threshold (cm) for ultrasonic sensor
 
         print(f"Preparing to align with cube at center angle {center_angle:.2f}°...")
@@ -498,7 +527,7 @@ class IntegratedRobot:
         # Step 3: Sweep until cube is detected or maximum bounds are reached
         current_angle = start_angle
         while True:
-            distance = self.shared_data["distance"]
+            distance = self.front_us.get_value()
 
             if distance is not None and distance <= ALIGNMENT_THRESHOLD or self.is_cube():
                 print(f"Cube detected at {distance:.2f} cm. Alignment complete.")
@@ -578,7 +607,7 @@ class IntegratedRobot:
 
         print(f"RGB values: R={r} G={g} B={b}")
         # Simple heuristic to detect blueish color (you can adjust thresholds based on testing)
-        if r >= 190:
+        if r > 40 and b < 20:
             print("Poop detected.")
             return True
         return False
@@ -866,7 +895,7 @@ def main():
                     if block_position > 90:
                         robot.turn(block_position - 15 - 90)
                     else:
-                        robot.turn(block_position + 15 - 90)
+                        robot.turn(block_position + 15 -90)
 
             else:
                 # center_angle, distance = robot.detect_block()
@@ -910,11 +939,6 @@ def main():
         print("Exiting program")
         reset_brick()
         exit()
-
-
-if __name__ == "__main__":
-    main()
-
 
 
 if __name__ == "__main__":
